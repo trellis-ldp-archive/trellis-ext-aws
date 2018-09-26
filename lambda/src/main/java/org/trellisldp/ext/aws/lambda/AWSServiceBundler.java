@@ -38,6 +38,7 @@ import org.trellisldp.triplestore.TriplestoreResourceService;
  */
 public class AWSServiceBundler implements ServiceBundler {
 
+    /** The configuration key for the Neptune URL. **/
     public static final String TRELLIS_NEPTUNE_URL = "trellis.neptune.url";
 
     private AgentService agentService;

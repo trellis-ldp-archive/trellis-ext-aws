@@ -16,8 +16,11 @@ package org.trellisldp.ext.aws;
 import static com.amazonaws.services.s3.AmazonS3ClientBuilder.defaultClient;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
+import static org.trellisldp.api.RDFUtils.TRELLIS_DATA_PREFIX;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
 
 import java.time.Instant;
 import java.util.List;
@@ -63,17 +66,17 @@ public class S3MementoService implements MementoService {
         return runAsync(() -> {
             // TODO
             // write data quads to file at /tmp, then upload as a client.pubObject(pubObjectRequest)
-            // with new PutObjectRequest(bucket, key, file).withVersionId(time.toString())
+            // client.putObject(new PutObjectRequest(bucketName, getKey(identifier), file)
+            //        .withVersionId(getVersionId(time)));
         });
     }
 
     @Override
     public CompletableFuture<Resource> get(final IRI identifier, final Instant time) {
         return supplyAsync(() -> {
-            // TODO
-            // fetch a particular resource at the S3 location
-            // new GetObjectRequest(bucket, key).withVersionId(time.toString());
-            return null;
+            final S3Object s3Object = client.getObject(new GetObjectRequest(bucketName, getKey(identifier))
+                    .withVersionId(getVersionId(time)));
+            return new S3Resource(s3Object);
         });
     }
 
@@ -90,9 +93,15 @@ public class S3MementoService implements MementoService {
 
     @Override
     public CompletableFuture<Void> delete(final IRI identifier, final Instant time) {
-        return runAsync(() -> {
-            // TODO
-            // client.deleteVersion(bucket, key, time.toString())
-        });
+        return runAsync(() ->
+            client.deleteVersion(bucketName, getKey(identifier), getVersionId(time)));
+    }
+
+    private static String getVersionId(final Instant time) {
+        return Long.toString(time.toEpochMilli());
+    }
+
+    private static String getKey(final IRI identifier) {
+        return identifier.getIRIString().substring(TRELLIS_DATA_PREFIX.length());
     }
 }

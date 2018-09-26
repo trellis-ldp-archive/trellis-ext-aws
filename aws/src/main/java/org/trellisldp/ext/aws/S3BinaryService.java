@@ -59,6 +59,7 @@ public class S3BinaryService implements BinaryService {
 
     public static final String TRELLIS_BINARY_BUCKET = "trellis.s3.bucket.binaries";
 
+    private static final String PREFIX = "s3://";
     private static final String SHA = "SHA";
     private static final Logger LOGGER = getLogger(S3BinaryService.class);
     private static final Set<String> algorithms = asList(MD5, MD2, SHA, SHA_1, SHA_256, SHA_384, SHA_512,
@@ -89,16 +90,14 @@ public class S3BinaryService implements BinaryService {
     @Override
     public CompletableFuture<InputStream> getContent(final IRI identifier) {
         return supplyAsync(() -> {
-            final S3Resource res = new S3Resource(identifier);
-            return client.getObject(res.getBucket(), res.getKey()).getObjectContent();
+            return client.getObject(bucketName, getKey(identifier)).getObjectContent();
         });
     }
 
     @Override
     public CompletableFuture<InputStream> getContent(final IRI identifier, final Integer from, final Integer to) {
         return supplyAsync(() -> {
-            final S3Resource res = new S3Resource(identifier);
-            return client.getObject(new GetObjectRequest(res.getBucket(), res.getKey()).withRange(from, to))
+            return client.getObject(new GetObjectRequest(bucketName, getKey(identifier)).withRange(from, to))
                 .getObjectContent();
         });
     }
@@ -106,8 +105,7 @@ public class S3BinaryService implements BinaryService {
     @Override
     public CompletableFuture<Void> purgeContent(final IRI identifier) {
         return runAsync(() -> {
-            final S3Resource res = new S3Resource(identifier);
-            client.deleteObject(res.getBucket(), res.getKey());
+            client.deleteObject(bucketName, getKey(identifier));
         });
     }
 
@@ -115,21 +113,19 @@ public class S3BinaryService implements BinaryService {
     public CompletableFuture<Void> setContent(final IRI identifier, final InputStream stream,
             final Map<String, String> metadata) {
         return runAsync(() -> {
-            final S3Resource res = new S3Resource(identifier);
             final ObjectMetadata md = new ObjectMetadata();
             md.setUserMetadata(metadata);
-            client.putObject(res.getBucket(), res.getKey(), stream, md);
+            client.putObject(bucketName, getKey(identifier), stream, md);
         });
     }
 
     @Override
     public CompletableFuture<String> calculateDigest(final IRI identifier, final String algorithm) {
         return supplyAsync(() -> {
-            final S3Resource res = new S3Resource(identifier);
             if (SHA.equals(algorithm)) {
-                return computeDigest(res.getBucket(), res.getKey(), getDigest(SHA_1));
+                return computeDigest(bucketName, getKey(identifier), getDigest(SHA_1));
             } else if (supportedAlgorithms().contains(algorithm)) {
-                return computeDigest(res.getBucket(), res.getKey(), getDigest(algorithm));
+                return computeDigest(bucketName, getKey(identifier), getDigest(algorithm));
             }
             LOGGER.warn("Algorithm not supported: {}", algorithm);
             return null;
@@ -143,7 +139,7 @@ public class S3BinaryService implements BinaryService {
 
     @Override
     public String generateIdentifier() {
-        return idService.getSupplier("s3://" + bucketName + "/").get();
+        return idService.getSupplier(PREFIX).get();
     }
 
     private String computeDigest(final String bucket, final String key, final MessageDigest algorithm) {
@@ -155,26 +151,11 @@ public class S3BinaryService implements BinaryService {
         }
     }
 
-    private static class S3Resource {
-        private final String bucketName;
-        private final String key;
-
-        public S3Resource(final IRI identifier) {
-            final String[] parts = identifier.getIRIString().split("/", 4);
-            if (parts.length == 4 && parts[0].equals("s3:")) {
-                this.bucketName = parts[2];
-                this.key = parts[3];
-            } else {
-                throw new RuntimeTrellisException("Invalid identifier: " + identifier);
-            }
+    private static String getKey(final IRI identifier) {
+        final String id = identifier.getIRIString();
+        if (id.startsWith(PREFIX)) {
+            return id.substring(PREFIX.length());
         }
-
-        public String getBucket() {
-            return bucketName;
-        }
-
-        public String getKey() {
-            return key;
-        }
+        throw new RuntimeTrellisException("Invalid identifier: " + identifier);
     }
 }

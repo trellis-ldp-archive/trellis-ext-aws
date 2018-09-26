@@ -13,12 +13,18 @@
  */
 package org.trellisldp.ext.aws;
 
+import static org.trellisldp.api.RDFUtils.TRELLIS_DATA_PREFIX;
+import static org.trellisldp.api.RDFUtils.getInstance;
+
+import com.amazonaws.services.s3.model.S3Object;
+
 import java.time.Instant;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.Quad;
+import org.apache.commons.rdf.api.RDF;
 import org.trellisldp.api.Binary;
 import org.trellisldp.api.Resource;
 
@@ -26,6 +32,18 @@ import org.trellisldp.api.Resource;
  * An S3-based resource.
  */
 public class S3Resource implements Resource {
+
+    private static final RDF rdf = getInstance();
+
+    private final S3Object s3Object;
+
+    /**
+     * Create a Trellis resource from an S3Object.
+     * @param s3Object the object from S3
+     */
+    public S3Resource(final S3Object s3Object) {
+        this.s3Object = s3Object;
+    }
 
     @Override
     public Stream<Quad> stream() {
@@ -35,8 +53,7 @@ public class S3Resource implements Resource {
 
     @Override
     public IRI getIdentifier() {
-        // TODO
-        return null;
+        return rdf.createIRI(TRELLIS_DATA_PREFIX + s3Object.getKey());
     }
 
     @Override
