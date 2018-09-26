@@ -8,20 +8,21 @@ ext {
 }
 
 dependencies {
-    api("org.apache.commons:commons-lang3:$commonsLangVersion")
-    api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
     api("org.trellisldp:trellis-api:$trellisVersion")
-    api("com.amazonaws:aws-java-sdk-s3:$awsVersion")
-    api("com.amazonaws:aws-java-sdk-sns:$awsVersion")
 
+    implementation("com.amazonaws.serverless:aws-serverless-java-container-jersey:$awsJerseyVersion")
     implementation("commons-codec:commons-codec:$commonsCodecVersion")
     implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
+    implementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
+    implementation("org.trellisldp:trellis-agent:$trellisVersion")
+    implementation("org.trellisldp:trellis-event-serialization:$trellisVersion")
     implementation("org.trellisldp:trellis-id:$trellisVersion")
+    implementation("org.trellisldp:trellis-io-jena:$trellisVersion")
+    implementation("org.trellisldp:trellis-triplestore:$trellisVersion")
     implementation("org.trellisldp:trellis-vocabulary:$trellisVersion")
+    implementation project(":trellis-aws")
 
-    testImplementation("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
-    testImplementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
 }
 

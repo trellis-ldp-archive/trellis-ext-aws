@@ -1,5 +1,7 @@
 enableFeaturePreview('STABLE_PUBLISHING')
 rootProject.name = 'trellis-ext-aws'
 include ':trellis-aws'
+include ':trellis-aws-lambda'
 
 project(':trellis-aws').projectDir = "$rootDir/aws" as File
+project(':trellis-aws-lambda').projectDir = "$rootDir/lambda" as File

@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.trellisldp.ext.aws;
+package org.trellisldp.ext.aws.lambda;
 
 import static org.apache.jena.rdfconnection.RDFConnectionFactory.connect;
 import static org.apache.tamaya.ConfigurationProvider.getConfiguration;
@@ -23,14 +23,14 @@ import org.trellisldp.api.AuditService;
 import org.trellisldp.api.BinaryService;
 import org.trellisldp.api.EventService;
 import org.trellisldp.api.IOService;
-import org.trellisldp.api.IdentifierService;
 import org.trellisldp.api.MementoService;
-import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.ResourceService;
 import org.trellisldp.api.ServiceBundler;
+import org.trellisldp.ext.aws.S3BinaryService;
+import org.trellisldp.ext.aws.S3MementoService;
+import org.trellisldp.ext.aws.SNSEventService;
 import org.trellisldp.id.UUIDGenerator;
 import org.trellisldp.io.JenaIOService;
-import org.trellisldp.rdfa.HtmlSerializer;
 import org.trellisldp.triplestore.TriplestoreResourceService;
 
 /**
@@ -52,16 +52,14 @@ public class AWSServiceBundler implements ServiceBundler {
      * Get an AWS-based service bundler using Newton.
      */
     public AWSServiceBundler() {
-        final IdentifierService idService = new UUIDGenerator();
-        final NamespaceService nsService = new NamespaceCacheService();
         final RDFConnection rdfConnection = connect(getConfiguration().get(TRELLIS_NEPTUNE_URL));
 
         eventService = new SNSEventService();
         agentService = new SimpleAgentService();
         binaryService = new S3BinaryService();
         mementoService = new S3MementoService();
-        ioService = new JenaIOService(nsService, new HtmlSerializer(nsService), new ProfileCacheService());
-        auditService = resourceService = new TriplestoreResourceService(rdfConnection, idService);
+        ioService = new JenaIOService();
+        auditService = resourceService = new TriplestoreResourceService(rdfConnection, new UUIDGenerator());
     }
 
     @Override
