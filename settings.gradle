@@ -1,0 +1,5 @@
+enableFeaturePreview('STABLE_PUBLISHING')
+rootProject.name = 'trellis-ext-aws'
+include ':trellis-aws'
+
+project(':trellis-aws').projectDir = "$rootDir/aws" as File

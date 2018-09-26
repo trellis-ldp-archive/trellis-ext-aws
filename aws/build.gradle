@@ -1,0 +1,59 @@
+apply plugin: 'java-library'
+apply plugin: 'osgi'
+
+description = 'Trellis cloud extension'
+
+ext {
+    moduleName = 'org.trellisldp.ext.aws'
+}
+
+dependencies {
+    api("org.apache.commons:commons-lang3:$commonsLangVersion")
+    api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
+    api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
+    api("org.trellisldp:trellis-api:$trellisVersion")
+    api("org.trellisldp:trellis-audit:$trellisVersion")
+    api("com.amazonaws:aws-java-sdk-s3:$awsVersion")
+    api("com.amazonaws:aws-java-sdk-sns:$awsVersion")
+    api("com.amazonaws:aws-java-sdk-elasticache:$awsVersion")
+    api("redis.clients:jedis:$jedisVersion")
+
+    implementation("com.amazonaws.serverless:aws-serverless-java-container-jersey:$awsJerseyVersion")
+    implementation("commons-codec:commons-codec:$commonsCodecVersion")
+    implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
+    implementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
+    implementation("org.trellisldp:trellis-agent:$trellisVersion")
+    implementation("org.trellisldp:trellis-event-serialization:$trellisVersion")
+    implementation("org.trellisldp:trellis-id:$trellisVersion")
+    implementation("org.trellisldp:trellis-io-jena:$trellisVersion")
+    implementation("org.trellisldp:trellis-rdfa:$trellisVersion")
+    implementation("org.trellisldp:trellis-triplestore:$trellisVersion")
+    implementation("org.trellisldp:trellis-vocabulary:$trellisVersion")
+
+    testImplementation("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
+    testImplementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
+    testImplementation("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation("org.trellisldp:trellis-id:$trellisVersion")
+    testImplementation("org.trellisldp:trellis-test:$trellisVersion")
+}
+
+jar {
+    manifest {
+        description project.description
+        docURL project.docURL
+        vendor project.vendor
+        license project.license
+
+        instruction 'Automatic-Module-Name', moduleName
+        instruction 'Import-Package', '*'
+        instruction 'Export-Package', "${moduleName};version=${projectOsgiVersion}"
+        instruction 'Require-Capability', '''\
+            osgi.extender; filter:="(osgi.extender=osgi.serviceloader.processor)",
+            osgi.serviceloader;
+                filter:="(osgi.serviceloader=org.apache.commons.rdf.api.RDF)";
+                resolution:=mandatory; cardinality:=at_least_one
+            '''
+    }
+}
+
