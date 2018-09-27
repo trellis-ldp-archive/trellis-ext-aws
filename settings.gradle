@@ -3,7 +3,9 @@ rootProject.name = 'trellis-ext-aws'
 include ':trellis-aws'
 include ':trellis-aws-lambda'
 include ':trellis-aws-app'
+include ':trellis-aws-deployment'
 
 project(':trellis-aws').projectDir = "$rootDir/aws" as File
 project(':trellis-aws-lambda').projectDir = "$rootDir/lambda" as File
 project(':trellis-aws-app').projectDir = "$rootDir/app" as File
+project(':trellis-aws-deployment').projectDir = "$rootDir/deployment" as File

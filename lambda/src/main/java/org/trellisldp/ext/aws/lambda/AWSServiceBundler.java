@@ -55,8 +55,8 @@ public class AWSServiceBundler implements ServiceBundler {
     public AWSServiceBundler() {
         final RDFConnection rdfConnection = connect(getConfiguration().get(TRELLIS_NEPTUNE_URL));
 
-        eventService = new SNSEventService();
         agentService = new SimpleAgentService();
+        eventService = new SNSEventService();
         binaryService = new S3BinaryService();
         mementoService = new S3MementoService();
         ioService = new JenaIOService();
