@@ -37,24 +37,23 @@ import org.trellisldp.vocabulary.VCARD;
 import org.trellisldp.vocabulary.XSD;
 
 /**
- * A static namespace service.
+ * An in-memory namespace service.
  *
  * <p>This service will load some standard namespaces/prefixes and read
  * system properties into the namespace maping if they are defined like so:
  * "trellis.ns-myprefix=http://example.com/namespace"
  */
-public class StaticNamespaceService implements NamespaceService {
+public class MemoryNamespaceService implements NamespaceService {
 
     private static final String PREFIX = "trellis.ns-";
 
     private final Map<String, String> namespaces = new HashMap<>();
     private final Map<String, String> namespacesRev = new HashMap<>();
 
-
     /**
-     * Create a statically assigned namespace service.
+     * Create an in-memory namespace service.
      */
-    public StaticNamespaceService() {
+    public MemoryNamespaceService() {
         namespaces.put("ldp", LDP.getNamespace());
         namespaces.put("acl", ACL.getNamespace());
         namespaces.put("as", AS.getNamespace());
@@ -77,11 +76,6 @@ public class StaticNamespaceService implements NamespaceService {
         namespaces.forEach((k, v) -> namespacesRev.put(v, k));
     }
 
-    private static Map<String, String> initialPrefixes() {
-        final Map<String, String> data = new HashMap<>();
-        return data;
-    }
-
     @Override
     public Map<String, String> getNamespaces() {
         return unmodifiableMap(namespaces);
@@ -101,5 +95,4 @@ public class StaticNamespaceService implements NamespaceService {
     public Boolean setPrefix(final String prefix, final String namespace) {
         return true;
     }
-
 }
