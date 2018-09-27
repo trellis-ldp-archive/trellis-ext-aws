@@ -32,6 +32,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
@@ -41,13 +42,18 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.Range;
 import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.Literal;
 import org.apache.commons.rdf.api.Quad;
+import org.apache.commons.rdf.api.RDFTerm;
+import org.apache.commons.rdf.api.Triple;
 import org.apache.commons.rdf.jena.JenaDataset;
 import org.apache.commons.rdf.jena.JenaRDF;
 import org.apache.jena.riot.RDFDataMgr;
@@ -56,6 +62,10 @@ import org.slf4j.Logger;
 import org.trellisldp.api.MementoService;
 import org.trellisldp.api.Resource;
 import org.trellisldp.api.RuntimeTrellisException;
+import org.trellisldp.vocabulary.DC;
+import org.trellisldp.vocabulary.LDP;
+import org.trellisldp.vocabulary.RDF;
+import org.trellisldp.vocabulary.Trellis;
 
 /**
  * An S3-based Memento service.
@@ -67,6 +77,7 @@ public class S3MementoService implements MementoService {
     private static final Logger LOGGER = getLogger(S3MementoService.class);
     private static final JenaRDF rdf = new JenaRDF();
 
+    private final Map<IRI, String> propertyMapping = new HashMap<>();
     private final AmazonS3 client;
     private final String bucketName;
 
@@ -85,23 +96,65 @@ public class S3MementoService implements MementoService {
     public S3MementoService(final String bucketName, final AmazonS3 client) {
         this.bucketName = bucketName;
         this.client = client;
+        propertyMapping.put(LDP.membershipResource, S3Resource.MEMBERSHIP_RESOURCE);
+        propertyMapping.put(LDP.hasMemberRelation, S3Resource.MEMBER_RELATION);
+        propertyMapping.put(LDP.isMemberOfRelation, S3Resource.MEMBER_OF_RELATION);
+        propertyMapping.put(LDP.insertedContentRelation, S3Resource.INSERTED_CONTENT_RELATION);
     }
 
     @Override
     public CompletableFuture<Void> put(final IRI identifier, final Instant time, final Stream<? extends Quad> data) {
         return runAsync(() -> {
             final File file = getTempFile();
+            final Map<String, String> metadata = new HashMap<>();
             try (final JenaDataset dataset = rdf.createDataset();
                     final OutputStream output = new FileOutputStream(file)) {
-                data.forEach(dataset::add);
-                // TODO
-                // separate out any server-managed triples and put them into the S3 object metadata
+                data.forEachOrdered(dataset::add);
+                dataset.getGraph(Trellis.PreferServerManaged).ifPresent(graph -> {
+                    graph.stream(identifier, null, null).forEachOrdered(triple -> {
+                        final RDFTerm obj = triple.getObject();
+                        if (RDF.type.equals(triple.getPredicate()) && obj instanceof IRI) {
+                            metadata.put(S3Resource.INTERACTION_MODEL, ((IRI) obj).getIRIString());
+                        } else if (DC.modified.equals(triple.getPredicate()) && obj instanceof Literal) {
+                            metadata.put(S3Resource.MODIFIED, ((Literal) obj).getLexicalForm());
+                        }
+                    });
+                    graph.stream(identifier, DC.hasPart, null).findFirst().map(Triple::getObject).ifPresent(id -> {
+                        if (id instanceof IRI) {
+                            graph.stream((IRI) id, null, null).forEachOrdered(triple -> {
+                                final RDFTerm obj = triple.getObject();
+                                if (DC.extent.equals(triple.getPredicate()) && obj instanceof Literal) {
+                                    metadata.put(S3Resource.BINARY_SIZE, ((Literal) obj).getLexicalForm());
+                                } else if (DC.format.equals(triple.getPredicate()) && obj instanceof Literal) {
+                                    metadata.put(S3Resource.BINARY_TYPE, ((Literal) obj).getLexicalForm());
+                                } else if (DC.modified.equals(triple.getPredicate()) && obj instanceof Literal) {
+                                    metadata.put(S3Resource.BINARY_LOCATION, ((IRI) id).getIRIString());
+                                    metadata.put(S3Resource.BINARY_DATE, ((Literal) obj).getLexicalForm());
+                                }
+                            });
+                        }
+                    });
+                });
+                dataset.getGraph(Trellis.PreferUserManaged).ifPresent(graph -> {
+                    graph.stream(identifier, null, null).forEachOrdered(triple -> {
+                        final RDFTerm obj = triple.getObject();
+                        if (propertyMapping.containsKey(triple.getPredicate()) && obj instanceof IRI) {
+                            metadata.put(propertyMapping.get(triple.getPredicate()), ((IRI) obj).getIRIString());
+                        }
+                    });
+                });
+                if (dataset.getGraph(Trellis.PreferAccessControl).isPresent()) {
+                    metadata.put(S3Resource.HAS_ACL, "true");
+                }
                 RDFDataMgr.write(output, dataset.asJenaDatasetGraph(), NQUADS);
             } catch (final Exception ex) {
                 LOGGER.error("Error closing dataset: {}", ex.getMessage());
                 throw new RuntimeTrellisException(ex);
             }
-            client.putObject(new PutObjectRequest(bucketName, getKey(identifier, time), file));
+            final ObjectMetadata md = new ObjectMetadata();
+            md.setContentType("application/n-quads");
+            md.setUserMetadata(metadata);
+            client.putObject(new PutObjectRequest(bucketName, getKey(identifier, time), file).withMetadata(md));
         });
     }
 
