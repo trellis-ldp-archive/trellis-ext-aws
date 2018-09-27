@@ -220,14 +220,12 @@ subprojects { subproj ->
 
     tasks.withType(PublishToMavenRepository) {
         onlyIf {
-			// TODO - fix this
-            subproj.name != "trellis-db-deployment"
+            subproj.name != "trellis-aws-deployment"
         }
     }
     tasks.withType(PublishToMavenLocal) {
         onlyIf {
-			// TODO - fix this
-            subproj.name != "trellis-db-deployment"
+            subproj.name != "trellis-aws-deployment"
         }
     }
     task install(dependsOn: [assemble, publishToMavenLocal])
@@ -265,6 +263,7 @@ subprojects { subproj ->
             links 'https://trellis-ldp.github.io/trellis/apidocs/'
             links 'https://commons.apache.org/proper/commons-lang/javadocs/api-3.8/'
             links 'https://commons.apache.org/proper/commons-rdf/apidocs/'
+            links 'https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/'
         }
     }
 
@@ -317,6 +316,7 @@ configure(rootProject) {
             links 'https://trellis-ldp.github.io/trellis/apidocs/'
             links 'https://commons.apache.org/proper/commons-lang/javadocs/api-3.8/'
             links 'https://commons.apache.org/proper/commons-rdf/apidocs/'
+            links 'https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/'
         }
 
         source subprojects.collect { project -> project.sourceSets.main.allJava }
@@ -352,7 +352,7 @@ configure(rootProject) {
 		additionalSourceDirs = files(subprojects.sourceSets.main.allSource.srcDirs)
 		sourceDirectories = files(subprojects.sourceSets.main.allSource.srcDirs)
 		classDirectories =  files(subprojects.sourceSets.main.output)
-        executionData = files(subprojects.findAll { it.name != 'trellis-db-deployment' }.jacocoTestReport.executionData)
+        executionData = files(subprojects.findAll { it.name != 'trellis-aws-deployment' }.jacocoTestReport.executionData)
 		reports {
 			html.enabled = true
 			xml.enabled = true
