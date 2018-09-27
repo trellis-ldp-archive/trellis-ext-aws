@@ -1,6 +1,6 @@
 #!/bin/sh
 
-systemctl stop trellis-db
-systemctl disable trellis-db
+systemctl stop trellis-aws
+systemctl disable trellis-aws
 systemctl daemon-reload
 systemctl reset-failed

@@ -4,8 +4,8 @@
 FROM openjdk:8-jdk
 MAINTAINER Greg Jansen <jansen@umd.edu>
 
-ADD trellis-db-*.tar /opt
-RUN mv /opt/trellis-db-* /opt/trellis
+ADD trellis-aws-*.tar /opt
+RUN mv /opt/trellis-aws-* /opt/trellis
 COPY command.sh /
 COPY config.yml /
 RUN chmod +x /command.sh
