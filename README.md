@@ -1,42 +1,14 @@
-# Cloud-native Trellis
+# AWS-based Trellis
+
+Trellis is a Linked Data server designed for high performance. `trellis-ext-aws` is a subproject that implements
+the core Trellis services to run directly in the Amazon cloud. This version of Trellis can be deployed as part
+of an elastic beanstalk (each running Trellis-AWS in an EC2 container) or, simply, as a Lambda service.
+
+**Note:** this is a work in progress.
 
 ## Requirements
 
   * Java 8 or later
-  * AWS account
+  * an AWS account
 
-## Installation
 
-To install Trellis as a systemd service on an EC2 linux machine, follow these steps:
-
-1. Move the unpacked Trellis directory to a location such as `/opt/trellis`.
-   If you choose a different location, please update the `./etc/trellis-aws.service` script.
-
-2. Edit the `./etc/environment` file as desired (optional).
-
-3. Edit the `./etc/config.yml` file as desired. The database connection MUST be configured.
-
-4. Create a trellis user:
-
-        $ sudo useradd -r trellis -s /sbin/nologin
-
-5. Create data directories
-
-        $ sudo mkdir /opt/trellis/data
-        $ sudo chown trellis.trellis /opt/trellis/data
-
-6. Install the systemd file:
-
-        $ sudo systemctl link /opt/trellis/etc/trellis-aws.service
-
-7. Reload systemd to see the changes
-
-        $ sudo systemctl daemon-reload
-
-8. Start the trellis service
-
-        $ sudo systemctl start trellis-aws
-
-To check that trellis is running, check the URL: `http://localhost:8080`
-
-Application health checks are available at `http://localhost:8081/healthcheck`
