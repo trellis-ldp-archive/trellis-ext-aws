@@ -13,94 +13,126 @@
  */
 package org.trellisldp.ext.aws;
 
+import static java.time.Instant.parse;
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+import static org.apache.jena.query.DatasetFactory.create;
+import static org.apache.jena.riot.Lang.NQUADS;
+import static org.slf4j.LoggerFactory.getLogger;
 import static org.trellisldp.api.RDFUtils.TRELLIS_DATA_PREFIX;
-import static org.trellisldp.api.RDFUtils.getInstance;
 
 import com.amazonaws.services.s3.model.S3Object;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.Quad;
-import org.apache.commons.rdf.api.RDF;
+import org.apache.commons.rdf.jena.JenaRDF;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.riot.RDFParser;
+import org.slf4j.Logger;
 import org.trellisldp.api.Binary;
 import org.trellisldp.api.Resource;
+import org.trellisldp.api.RuntimeTrellisException;
 
 /**
  * An S3-based resource.
  */
 public class S3Resource implements Resource {
 
-    private static final RDF rdf = getInstance();
+    public static final String INTERACTION_MODEL = "trellis.interactionModel";
+    public static final String MODIFIED = "trellis.modified";
+    public static final String HAS_ACL = "trellis.hasACL";
+    public static final String MEMBERSHIP_RESOURCE = "trellis.membershipResource";
+    public static final String MEMBER_RELATION = "trellis.hasMemberRelation";
+    public static final String MEMBER_OF_RELATION = "trellis.isMemberOfRelation";
+    public static final String INSERTED_CONTENT_RELATION = "trellis.insertedContentRelation";
+    public static final String BINARY_LOCATION = "trellis.binaryLocation";
+    public static final String BINARY_DATE = "trellis.binaryDate";
+    public static final String BINARY_TYPE = "trellis.binaryMimeType";
+    public static final String BINARY_SIZE = "trellis.binarySize";
 
-    private final S3Object s3Object;
+    private static final JenaRDF rdf = new JenaRDF();
+    private static final Logger LOGGER = getLogger(S3Resource.class);
+
+    private final S3Object res;
 
     /**
      * Create a Trellis resource from an S3Object.
      * @param s3Object the object from S3
      */
     public S3Resource(final S3Object s3Object) {
-        this.s3Object = s3Object;
-    }
-
-    @Override
-    public Stream<Quad> stream() {
-        // TODO
-        return null;
+        this.res = s3Object;
     }
 
     @Override
     public IRI getIdentifier() {
-        return rdf.createIRI(TRELLIS_DATA_PREFIX + s3Object.getKey());
-    }
-
-    @Override
-    public IRI getInteractionModel() {
-        // TODO
-        return null;
-    }
-
-    @Override
-    public Optional<IRI> getMembershipResource() {
-        // TODO
-        return null;
-    }
-
-    @Override
-    public Optional<IRI> getMemberRelation() {
-        // TODO
-        return null;
-    }
-
-    @Override
-    public Optional<IRI> getMemberOfRelation() {
-        // TODO
-        return null;
-    }
-
-    @Override
-    public Optional<IRI> getInsertedContentRelation() {
-        // TODO
-        return null;
-    }
-
-    @Override
-    public Optional<Binary> getBinary() {
-        // TODO
-        return null;
+        return rdf.createIRI(TRELLIS_DATA_PREFIX + res.getKey());
     }
 
     @Override
     public Instant getModified() {
-        // TODO
-        return null;
+        return ofNullable(getMetadata(MODIFIED)).map(Instant::parse).orElse(null);
+    }
+
+    @Override
+    public IRI getInteractionModel() {
+        return ofNullable(getMetadata(INTERACTION_MODEL)).map(rdf::createIRI).orElse(null);
+    }
+
+    @Override
+    public Optional<IRI> getMembershipResource() {
+        return ofNullable(getMetadata(MEMBERSHIP_RESOURCE)).map(rdf::createIRI);
+    }
+
+    @Override
+    public Optional<IRI> getMemberRelation() {
+        return ofNullable(getMetadata(MEMBER_RELATION)).map(rdf::createIRI);
+    }
+
+    @Override
+    public Optional<IRI> getMemberOfRelation() {
+        return ofNullable(getMetadata(MEMBER_OF_RELATION)).map(rdf::createIRI);
+    }
+
+    @Override
+    public Optional<IRI> getInsertedContentRelation() {
+        return ofNullable(getMetadata(INSERTED_CONTENT_RELATION)).map(rdf::createIRI);
     }
 
     @Override
     public Boolean hasAcl() {
-        // TODO
-        return null;
+        return ofNullable(getMetadata(HAS_ACL)).isPresent();
+    }
+
+    @Override
+    public Optional<Binary> getBinary() {
+        final String binaryLocation = getMetadata(BINARY_LOCATION);
+        final String binaryDate = getMetadata(BINARY_DATE);
+        final String binaryType = getMetadata(BINARY_TYPE);
+        final Long binarySize = ofNullable(getMetadata(BINARY_SIZE)).map(Long::parseLong).orElse(null);
+        return ofNullable(binaryLocation).filter(x -> nonNull(binaryDate)).map(rdf::createIRI)
+            .map(loc -> new Binary(loc, parse(binaryDate), binaryType, binarySize));
+    }
+
+    @Override
+    public Stream<? extends Quad> stream() {
+        final Dataset dataset = create();
+        try (final InputStream input = res.getObjectContent()) {
+            RDFParser.source(input).lang(NQUADS).parse(dataset);
+        } catch (final IOException ex) {
+            LOGGER.error("Error parsing input from S3: {}", ex.getMessage());
+            dataset.close();
+            throw new RuntimeTrellisException(ex);
+        }
+        return rdf.asDataset(dataset).stream().onClose(dataset::close);
+    }
+
+    private String getMetadata(final String key) {
+        return res.getObjectMetadata().getUserMetaDataOf(key);
     }
 }

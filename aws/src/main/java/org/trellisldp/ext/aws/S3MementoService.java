@@ -20,7 +20,6 @@ import static org.trellisldp.api.RDFUtils.TRELLIS_DATA_PREFIX;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
 
 import java.time.Instant;
 import java.util.List;
@@ -74,9 +73,9 @@ public class S3MementoService implements MementoService {
     @Override
     public CompletableFuture<Resource> get(final IRI identifier, final Instant time) {
         return supplyAsync(() -> {
-            final S3Object s3Object = client.getObject(new GetObjectRequest(bucketName, getKey(identifier))
-                    .withVersionId(getVersionId(time)));
-            return new S3Resource(s3Object);
+            final GetObjectRequest req = new GetObjectRequest(bucketName, getKey(identifier))
+                .withVersionId(getVersionId(time));
+            return new S3Resource(client.getObject(req));
         });
     }
 
