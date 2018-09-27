@@ -24,13 +24,16 @@ import org.trellisldp.api.BinaryService;
 import org.trellisldp.api.EventService;
 import org.trellisldp.api.IOService;
 import org.trellisldp.api.MementoService;
+import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.ResourceService;
 import org.trellisldp.api.ServiceBundler;
 import org.trellisldp.ext.aws.S3BinaryService;
 import org.trellisldp.ext.aws.S3MementoService;
 import org.trellisldp.ext.aws.SNSEventService;
+import org.trellisldp.ext.aws.StaticNamespaceService;
 import org.trellisldp.id.UUIDGenerator;
 import org.trellisldp.io.JenaIOService;
+import org.trellisldp.rdfa.HtmlSerializer;
 import org.trellisldp.triplestore.TriplestoreResourceService;
 
 /**
@@ -54,12 +57,13 @@ public class AWSServiceBundler implements ServiceBundler {
      */
     public AWSServiceBundler() {
         final RDFConnection rdfConnection = connect(getConfiguration().get(TRELLIS_NEPTUNE_URL));
+        final NamespaceService nsService = new StaticNamespaceService();
 
         agentService = new SimpleAgentService();
         eventService = new SNSEventService();
         binaryService = new S3BinaryService();
         mementoService = new S3MementoService();
-        ioService = new JenaIOService();
+        ioService = new JenaIOService(nsService, new HtmlSerializer(nsService));
         auditService = resourceService = new TriplestoreResourceService(rdfConnection, new UUIDGenerator());
     }
 

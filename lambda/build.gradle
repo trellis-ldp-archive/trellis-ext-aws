@@ -23,6 +23,7 @@ dependencies {
     implementation("org.trellisldp:trellis-id:$trellisVersion")
     implementation("org.trellisldp:trellis-io-jena:$trellisVersion")
     implementation("org.trellisldp:trellis-http:$trellisVersion")
+    implementation("org.trellisldp:trellis-rdfa:$trellisVersion")
     implementation("org.trellisldp:trellis-triplestore:$trellisVersion")
     implementation("org.trellisldp:trellis-vocabulary:$trellisVersion")
     implementation project(":trellis-aws")
