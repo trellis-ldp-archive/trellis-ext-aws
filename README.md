@@ -1,12 +1,13 @@
-# Installing Trellis
+# Cloud-native Trellis
 
 ## Requirements
 
   * Java 8 or later
+  * AWS account
 
 ## Installation
 
-To install Trellis as a systemd service on linux, follow these steps:
+To install Trellis as a systemd service on an EC2 linux machine, follow these steps:
 
 1. Move the unpacked Trellis directory to a location such as `/opt/trellis`.
    If you choose a different location, please update the `./etc/trellis-aws.service` script.
