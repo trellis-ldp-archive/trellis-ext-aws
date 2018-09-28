@@ -27,10 +27,10 @@ import org.trellisldp.api.MementoService;
 import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.ResourceService;
 import org.trellisldp.api.ServiceBundler;
-import org.trellisldp.ext.aws.MemoryNamespaceService;
 import org.trellisldp.ext.aws.S3BinaryService;
 import org.trellisldp.ext.aws.S3MementoService;
 import org.trellisldp.ext.aws.SNSEventService;
+import org.trellisldp.ext.aws.SimpleNamespaceService;
 import org.trellisldp.id.UUIDGenerator;
 import org.trellisldp.io.JenaIOService;
 import org.trellisldp.rdfa.HtmlSerializer;
@@ -57,7 +57,7 @@ public class AWSServiceBundler implements ServiceBundler {
      */
     public AWSServiceBundler() {
         final RDFConnection rdfConnection = connect(getConfiguration().get(TRELLIS_NEPTUNE_URL));
-        final NamespaceService nsService = new MemoryNamespaceService();
+        final NamespaceService nsService = new SimpleNamespaceService();
 
         agentService = new SimpleAgentService();
         eventService = new SNSEventService();

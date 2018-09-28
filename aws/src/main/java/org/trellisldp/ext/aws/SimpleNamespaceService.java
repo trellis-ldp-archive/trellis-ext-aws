@@ -37,13 +37,13 @@ import org.trellisldp.vocabulary.VCARD;
 import org.trellisldp.vocabulary.XSD;
 
 /**
- * An in-memory namespace service.
+ * A simple, in-memory namespace service.
  *
  * <p>This service will load some standard namespaces/prefixes and read
  * system properties into the namespace maping if they are defined like so:
  * "trellis.ns-myprefix=http://example.com/namespace"
  */
-public class MemoryNamespaceService implements NamespaceService {
+public class SimpleNamespaceService implements NamespaceService {
 
     private static final String PREFIX = "trellis.ns-";
 
@@ -51,9 +51,9 @@ public class MemoryNamespaceService implements NamespaceService {
     private final Map<String, String> namespacesRev = new HashMap<>();
 
     /**
-     * Create an in-memory namespace service.
+     * Create a simple, in-memory namespace service.
      */
-    public MemoryNamespaceService() {
+    public SimpleNamespaceService() {
         namespaces.put("ldp", LDP.getNamespace());
         namespaces.put("acl", ACL.getNamespace());
         namespaces.put("as", AS.getNamespace());
