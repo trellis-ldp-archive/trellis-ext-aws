@@ -14,11 +14,9 @@
 package org.trellisldp.ext.aws;
 
 import static java.util.Collections.unmodifiableMap;
-import static java.util.Optional.ofNullable;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.trellisldp.api.NamespaceService;
 import org.trellisldp.vocabulary.ACL;
@@ -48,7 +46,6 @@ public class SimpleNamespaceService implements NamespaceService {
     private static final String PREFIX = "trellis.ns-";
 
     private final Map<String, String> namespaces = new HashMap<>();
-    private final Map<String, String> namespacesRev = new HashMap<>();
 
     /**
      * Create a simple, in-memory namespace service.
@@ -73,22 +70,11 @@ public class SimpleNamespaceService implements NamespaceService {
                 namespaces.put(k.substring(PREFIX.length()), System.getProperty(k));
             }
         });
-        namespaces.forEach((k, v) -> namespacesRev.put(v, k));
     }
 
     @Override
     public Map<String, String> getNamespaces() {
         return unmodifiableMap(namespaces);
-    }
-
-    @Override
-    public Optional<String> getNamespace(final String prefix) {
-        return ofNullable(namespaces.get(prefix));
-    }
-
-    @Override
-    public Optional<String> getPrefix(final String namespace) {
-        return ofNullable(namespacesRev.get(namespace));
     }
 
     @Override

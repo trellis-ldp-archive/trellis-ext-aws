@@ -117,6 +117,8 @@ public class S3MementoService implements MementoService {
                             metadata.put(S3Resource.INTERACTION_MODEL, ((IRI) obj).getIRIString());
                         } else if (DC.modified.equals(triple.getPredicate()) && obj instanceof Literal) {
                             metadata.put(S3Resource.MODIFIED, ((Literal) obj).getLexicalForm());
+                        } else if (DC.isPartOf.equals(triple.getPredicate()) && obj instanceof IRI) {
+                            metadata.put(S3Resource.CONTAINER, ((IRI) obj).getIRIString());
                         }
                     });
                     graph.stream(identifier, DC.hasPart, null).findFirst().map(Triple::getObject).ifPresent(id -> {

@@ -46,6 +46,7 @@ public class S3Resource implements Resource {
 
     public static final String INTERACTION_MODEL = "trellis.interactionModel";
     public static final String MODIFIED = "trellis.modified";
+    public static final String CONTAINER = "trellis.container";
     public static final String HAS_ACL = "trellis.hasACL";
     public static final String MEMBERSHIP_RESOURCE = "trellis.membershipResource";
     public static final String MEMBER_RELATION = "trellis.hasMemberRelation";
@@ -82,6 +83,11 @@ public class S3Resource implements Resource {
     @Override
     public IRI getInteractionModel() {
         return ofNullable(getMetadata(INTERACTION_MODEL)).map(rdf::createIRI).orElse(null);
+    }
+
+    @Override
+    public Optional<IRI> getContainer() {
+        return ofNullable(getMetadata(CONTAINER)).map(rdf::createIRI);
     }
 
     @Override
