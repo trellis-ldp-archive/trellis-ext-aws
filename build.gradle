@@ -17,24 +17,24 @@ ext {
     commonsRdfVersion = '0.5.0'
     slf4jVersion = '1.7.25'
     guavaVersion = '26.0-jre'
-    dropwizardVersion = '1.3.5'
-    jenaVersion = '3.8.0'
+    dropwizardVersion = '1.3.7'
+    jenaVersion = '3.9.0'
     tamayaVersion = '0.3-incubating'
     trellisVersion = '0.8.0-SNAPSHOT'
     awsJerseyVersion = '1.1.4'
-    awsVersion = '1.11.416'
+    awsVersion = '1.11.424'
 
     /* Testing */
     activationVersion = '1.1.1'
     apiguardianVersion = '1.0.0'
     checkstyleVersion = '8.12'
     jaxbVersion = '2.3.0'
-    commonsTextVersion = '1.4'
+    commonsTextVersion = '1.5'
     jacocoVersion = '0.8.2'
     junitPlatformVersion = '1.3.1'
     junitVersion = '5.3.1'
     logbackVersion = '1.2.3'
-    mockitoVersion = '2.22.0'
+    mockitoVersion = '2.23.0'
 
     /* OSGi */
     projectOsgiVersion = project.version.replaceAll("-SNAPSHOT", ".SNAPSHOT")
