@@ -19,7 +19,7 @@ import static java.util.Optional.ofNullable;
 import static org.apache.jena.query.DatasetFactory.create;
 import static org.apache.jena.riot.Lang.NQUADS;
 import static org.slf4j.LoggerFactory.getLogger;
-import static org.trellisldp.api.RDFUtils.TRELLIS_DATA_PREFIX;
+import static org.trellisldp.api.TrellisUtils.TRELLIS_DATA_PREFIX;
 
 import com.amazonaws.services.s3.model.S3Object;
 

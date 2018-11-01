@@ -26,7 +26,7 @@ import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static org.apache.commons.lang3.Range.between;
 import static org.apache.jena.riot.Lang.NQUADS;
 import static org.slf4j.LoggerFactory.getLogger;
-import static org.trellisldp.api.RDFUtils.TRELLIS_DATA_PREFIX;
+import static org.trellisldp.api.TrellisUtils.TRELLIS_DATA_PREFIX;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
