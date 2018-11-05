@@ -17,13 +17,11 @@ import static com.amazonaws.services.s3.AmazonS3ClientBuilder.defaultClient;
 import static java.io.File.createTempFile;
 import static java.lang.Long.parseLong;
 import static java.lang.String.join;
-import static java.time.Instant.now;
 import static java.time.Instant.ofEpochSecond;
-import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.unmodifiableSortedSet;
 import static java.util.Objects.nonNull;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
-import static org.apache.commons.lang3.Range.between;
 import static org.apache.jena.riot.Lang.NQUADS;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.trellisldp.api.TrellisUtils.TRELLIS_DATA_PREFIX;
@@ -41,17 +39,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 
-import org.apache.commons.lang3.Range;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.Literal;
-import org.apache.commons.rdf.api.Quad;
 import org.apache.commons.rdf.api.RDFTerm;
 import org.apache.commons.rdf.api.Triple;
 import org.apache.commons.rdf.jena.JenaDataset;
@@ -103,15 +98,15 @@ public class S3MementoService implements MementoService {
     }
 
     @Override
-    public CompletableFuture<Void> put(final IRI identifier, final Instant time, final Stream<? extends Quad> data) {
+    public CompletableFuture<Void> put(final Resource resource) {
         return runAsync(() -> {
             final File file = getTempFile();
             final Map<String, String> metadata = new HashMap<>();
             try (final JenaDataset dataset = rdf.createDataset();
                     final OutputStream output = new FileOutputStream(file)) {
-                data.forEachOrdered(dataset::add);
+                resource.stream().forEachOrdered(dataset::add);
                 dataset.getGraph(Trellis.PreferServerManaged).ifPresent(graph -> {
-                    graph.stream(identifier, null, null).forEachOrdered(triple -> {
+                    graph.stream(resource.getIdentifier(), null, null).forEachOrdered(triple -> {
                         final RDFTerm obj = triple.getObject();
                         if (RDF.type.equals(triple.getPredicate()) && obj instanceof IRI) {
                             metadata.put(S3Resource.INTERACTION_MODEL, ((IRI) obj).getIRIString());
@@ -121,7 +116,8 @@ public class S3MementoService implements MementoService {
                             metadata.put(S3Resource.CONTAINER, ((IRI) obj).getIRIString());
                         }
                     });
-                    graph.stream(identifier, DC.hasPart, null).findFirst().map(Triple::getObject).ifPresent(id -> {
+                    graph.stream(resource.getIdentifier(), DC.hasPart, null).findFirst().map(Triple::getObject)
+                            .ifPresent(id -> {
                         if (id instanceof IRI) {
                             graph.stream((IRI) id, null, null).forEachOrdered(triple -> {
                                 final RDFTerm obj = triple.getObject();
@@ -138,7 +134,7 @@ public class S3MementoService implements MementoService {
                     });
                 });
                 dataset.getGraph(Trellis.PreferUserManaged).ifPresent(graph -> {
-                    graph.stream(identifier, null, null).forEachOrdered(triple -> {
+                    graph.stream(resource.getIdentifier(), null, null).forEachOrdered(triple -> {
                         final RDFTerm obj = triple.getObject();
                         if (propertyMapping.containsKey(triple.getPredicate()) && obj instanceof IRI) {
                             metadata.put(propertyMapping.get(triple.getPredicate()), ((IRI) obj).getIRIString());
@@ -156,7 +152,9 @@ public class S3MementoService implements MementoService {
             final ObjectMetadata md = new ObjectMetadata();
             md.setContentType("application/n-quads");
             md.setUserMetadata(metadata);
-            client.putObject(new PutObjectRequest(bucketName, getKey(identifier, time), file).withMetadata(md));
+            final PutObjectRequest req = new PutObjectRequest(bucketName, getKey(resource.getIdentifier(),
+                        resource.getModified()), file);
+            client.putObject(req.withMetadata(md));
         });
     }
 
@@ -169,9 +167,9 @@ public class S3MementoService implements MementoService {
     }
 
     @Override
-    public CompletableFuture<List<Range<Instant>>> list(final IRI identifier) {
+    public CompletableFuture<SortedSet<Instant>> mementos(final IRI identifier) {
         return supplyAsync(() -> {
-            final List<Instant> versions = new ArrayList<>();
+            final SortedSet<Instant> versions = new TreeSet<>();
             final ListObjectsRequest req = new ListObjectsRequest().withBucketName(bucketName)
                 .withPrefix(getKey(identifier, null)).withDelimiter("/");
             ObjectListing objs = client.listObjects(req);
@@ -182,19 +180,7 @@ public class S3MementoService implements MementoService {
                 objs.getObjectSummaries().stream().map(S3ObjectSummary::getKey).map(this::getInstant)
                     .forEachOrdered(versions::add);
             }
-
-            final List<Range<Instant>> mementos = new ArrayList<>();
-            Instant last = null;
-            for (final Instant time : versions) {
-                if (nonNull(last)) {
-                    mementos.add(between(last, time));
-                }
-                last = time;
-            }
-            if (nonNull(last)) {
-                mementos.add(between(last, now()));
-            }
-            return unmodifiableList(mementos);
+            return unmodifiableSortedSet(versions);
         });
     }
 
@@ -204,12 +190,6 @@ public class S3MementoService implements MementoService {
             return ofEpochSecond(parseLong(parts[1]));
         }
         return null;
-    }
-
-    @Override
-    public CompletableFuture<Void> delete(final IRI identifier, final Instant time) {
-        return runAsync(() ->
-            client.deleteObject(bucketName, getKey(identifier, time)));
     }
 
     private static String getKey(final IRI identifier, final Instant time) {
