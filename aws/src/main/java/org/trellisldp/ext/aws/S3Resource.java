@@ -14,7 +14,6 @@
 package org.trellisldp.ext.aws;
 
 import static java.time.Instant.parse;
-import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.jena.query.DatasetFactory.create;
 import static org.apache.jena.riot.Lang.NQUADS;
@@ -35,7 +34,7 @@ import org.apache.commons.rdf.jena.JenaRDF;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.riot.RDFParser;
 import org.slf4j.Logger;
-import org.trellisldp.api.Binary;
+import org.trellisldp.api.BinaryMetadata;
 import org.trellisldp.api.Resource;
 import org.trellisldp.api.RuntimeTrellisException;
 
@@ -116,13 +115,12 @@ public class S3Resource implements Resource {
     }
 
     @Override
-    public Optional<Binary> getBinary() {
+    public Optional<BinaryMetadata> getBinaryMetadata() {
         final String binaryLocation = getMetadata(BINARY_LOCATION);
-        final String binaryDate = getMetadata(BINARY_DATE);
         final String binaryType = getMetadata(BINARY_TYPE);
         final Long binarySize = ofNullable(getMetadata(BINARY_SIZE)).map(Long::parseLong).orElse(null);
-        return ofNullable(binaryLocation).filter(x -> nonNull(binaryDate)).map(rdf::createIRI)
-            .map(loc -> new Binary(loc, parse(binaryDate), binaryType, binarySize));
+        return ofNullable(binaryLocation).map(rdf::createIRI)
+            .map(loc -> BinaryMetadata.builder(loc).mimeType(binaryType).size(binarySize).build());
     }
 
     @Override
