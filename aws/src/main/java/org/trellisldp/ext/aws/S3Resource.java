@@ -124,7 +124,7 @@ public class S3Resource implements Resource {
     }
 
     @Override
-    public Stream<? extends Quad> stream() {
+    public Stream<Quad> stream() {
         final Dataset dataset = create();
         try (final InputStream input = res.getObjectContent()) {
             RDFParser.source(input).lang(NQUADS).parse(dataset);
@@ -133,7 +133,7 @@ public class S3Resource implements Resource {
             dataset.close();
             throw new RuntimeTrellisException(ex);
         }
-        return rdf.asDataset(dataset).stream().onClose(dataset::close);
+        return rdf.asDataset(dataset).stream().map(Quad.class::cast).onClose(dataset::close);
     }
 
     private String getMetadata(final String key) {
