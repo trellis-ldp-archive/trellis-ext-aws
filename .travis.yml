@@ -3,6 +3,10 @@ sudo: required
 dist: trusty
 group: edge
 
+addons:
+  sonarcloud:
+    organization: trellis-ldp
+
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -rf $HOME/.gradle/caches/*/plugin-resolution/
