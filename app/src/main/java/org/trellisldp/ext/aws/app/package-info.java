@@ -12,10 +12,10 @@
  * limitations under the License.
  */
 /**
- * Trellis Database Application
+ * Trellis AWS Application
  *
- * <p>This package provides a complete database-backed Trellis application.
+ * <p>This package provides a cloud-native Trellis application.
  *
  * @author acoburn
  */
-package org.trellisldp.ext.app.db;
+package org.trellisldp.ext.aws.app;

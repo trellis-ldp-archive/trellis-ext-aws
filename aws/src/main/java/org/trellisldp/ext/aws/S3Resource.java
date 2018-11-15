@@ -17,7 +17,6 @@ import static java.time.Instant.parse;
 import static java.util.Optional.ofNullable;
 import static org.apache.jena.query.DatasetFactory.create;
 import static org.apache.jena.riot.Lang.NQUADS;
-import static org.slf4j.LoggerFactory.getLogger;
 import static org.trellisldp.api.TrellisUtils.TRELLIS_DATA_PREFIX;
 
 import com.amazonaws.services.s3.model.S3Object;
@@ -33,7 +32,6 @@ import org.apache.commons.rdf.api.Quad;
 import org.apache.commons.rdf.jena.JenaRDF;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.riot.RDFParser;
-import org.slf4j.Logger;
 import org.trellisldp.api.BinaryMetadata;
 import org.trellisldp.api.Resource;
 import org.trellisldp.api.RuntimeTrellisException;
@@ -57,7 +55,6 @@ public class S3Resource implements Resource {
     public static final String BINARY_SIZE = "trellis.binarySize";
 
     private static final JenaRDF rdf = new JenaRDF();
-    private static final Logger LOGGER = getLogger(S3Resource.class);
 
     private final S3Object res;
 
@@ -129,9 +126,8 @@ public class S3Resource implements Resource {
         try (final InputStream input = res.getObjectContent()) {
             RDFParser.source(input).lang(NQUADS).parse(dataset);
         } catch (final IOException ex) {
-            LOGGER.error("Error parsing input from S3: {}", ex.getMessage());
             dataset.close();
-            throw new RuntimeTrellisException(ex);
+            throw new RuntimeTrellisException("Error parsing input from S3", ex);
         }
         return rdf.asDataset(dataset).stream().map(Quad.class::cast).onClose(dataset::close);
     }

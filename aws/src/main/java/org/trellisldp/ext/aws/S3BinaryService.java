@@ -89,24 +89,18 @@ public class S3BinaryService implements BinaryService {
 
     @Override
     public CompletableFuture<InputStream> getContent(final IRI identifier) {
-        return supplyAsync(() -> {
-            return client.getObject(bucketName, getKey(identifier)).getObjectContent();
-        });
+        return supplyAsync(() -> client.getObject(bucketName, getKey(identifier)).getObjectContent());
     }
 
     @Override
     public CompletableFuture<InputStream> getContent(final IRI identifier, final Integer from, final Integer to) {
-        return supplyAsync(() -> {
-            return client.getObject(new GetObjectRequest(bucketName, getKey(identifier)).withRange(from, to))
-                .getObjectContent();
-        });
+        return supplyAsync(() -> client.getObject(new GetObjectRequest(bucketName, getKey(identifier))
+                    .withRange(from, to)).getObjectContent());
     }
 
     @Override
     public CompletableFuture<Void> purgeContent(final IRI identifier) {
-        return runAsync(() -> {
-            client.deleteObject(bucketName, getKey(identifier));
-        });
+        return runAsync(() -> client.deleteObject(bucketName, getKey(identifier)));
     }
 
     @Override
@@ -146,8 +140,7 @@ public class S3BinaryService implements BinaryService {
         try (final InputStream input = client.getObject(bucket, key).getObjectContent()) {
             return getEncoder().encodeToString(updateDigest(algorithm, input).digest());
         } catch (final IOException ex) {
-            LOGGER.error("Error computing digest", ex);
-            throw new UncheckedIOException(ex);
+            throw new UncheckedIOException("Error computing digest", ex);
         }
     }
 

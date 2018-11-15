@@ -146,8 +146,7 @@ public class S3MementoService implements MementoService {
                 }
                 RDFDataMgr.write(output, dataset.asJenaDatasetGraph(), NQUADS);
             } catch (final Exception ex) {
-                LOGGER.error("Error closing dataset: {}", ex.getMessage());
-                throw new RuntimeTrellisException(ex);
+                throw new RuntimeTrellisException("Error closing dataset", ex);
             }
             final ObjectMetadata md = new ObjectMetadata();
             md.setContentType("application/n-quads");
@@ -160,10 +159,8 @@ public class S3MementoService implements MementoService {
 
     @Override
     public CompletableFuture<Resource> get(final IRI identifier, final Instant time) {
-        return supplyAsync(() -> {
-            final GetObjectRequest req = new GetObjectRequest(bucketName, getKey(identifier, time));
-            return new S3Resource(client.getObject(req));
-        });
+        return supplyAsync(() ->  new S3Resource(client.getObject(new GetObjectRequest(bucketName,
+                            getKey(identifier, time)))));
     }
 
     @Override
@@ -204,8 +201,7 @@ public class S3MementoService implements MementoService {
         try {
             return createTempFile("trellis-memento-", ".nq");
         } catch (final IOException ex) {
-            LOGGER.error("Error creating temporary file: {}", ex.getMessage());
-            throw new RuntimeTrellisException(ex);
+            throw new RuntimeTrellisException("Error creating temporary file", ex);
         }
     }
 }
