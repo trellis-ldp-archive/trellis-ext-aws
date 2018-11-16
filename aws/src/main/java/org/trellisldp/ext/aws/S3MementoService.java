@@ -65,7 +65,6 @@ public class S3MementoService implements MementoService {
 
     private static final JenaRDF rdf = new JenaRDF();
 
-    private final Map<IRI, String> propertyMapping = new HashMap<>();
     private final AmazonS3 client;
     private final String bucketName;
 
