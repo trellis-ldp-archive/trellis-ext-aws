@@ -13,7 +13,6 @@
  */
 package org.trellisldp.ext.aws;
 
-import static java.time.Instant.parse;
 import static java.util.Optional.ofNullable;
 import static org.apache.jena.query.DatasetFactory.create;
 import static org.apache.jena.riot.Lang.NQUADS;
