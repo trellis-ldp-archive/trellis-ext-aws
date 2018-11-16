@@ -15,9 +15,7 @@ package org.trellisldp.ext.aws;
 
 import static com.amazonaws.services.s3.AmazonS3ClientBuilder.defaultClient;
 import static java.io.File.createTempFile;
-import static java.lang.Long.parseLong;
 import static java.lang.String.join;
-import static java.time.Instant.ofEpochSecond;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.unmodifiableSortedSet;
 import static java.util.Objects.nonNull;
@@ -155,11 +153,8 @@ public class S3MementoService implements MementoService {
     }
 
     private Instant getInstant(final String key) {
-        final String[] parts = key.split("\\?version=", 2);
-        if (parts.length == 2) {
-            return ofEpochSecond(parseLong(parts[1])).truncatedTo(SECONDS);
-        }
-        return null;
+        return of(key).map(k -> k.split("\\?version=", 2)).filter(p -> p.length == 2).map(p -> p[1])
+            .map(Long::parseLong).map(Instant::ofEpochSecond).map(i -> i.truncatedTo(SECONDS)).orElse(null);
     }
 
     private static String getKey(final IRI identifier, final Instant time) {
