@@ -64,7 +64,6 @@ import org.trellisldp.vocabulary.Trellis;
 public class S3MementoService implements MementoService {
 
     public static final String TRELLIS_MEMENTO_BUCKET = "trellis.s3.bucket.mementos";
-    private static final String VERSION_PARAM = "?version=";
 
     private static final JenaRDF rdf = new JenaRDF();
 
@@ -156,7 +155,7 @@ public class S3MementoService implements MementoService {
     }
 
     private Instant getInstant(final String key) {
-        final String[] parts = key.split(VERSION_PARAM, 2);
+        final String[] parts = key.split("\\?version=", 2);
         if (parts.length == 2) {
             return ofEpochSecond(parseLong(parts[1])).truncatedTo(SECONDS);
         }
@@ -164,11 +163,12 @@ public class S3MementoService implements MementoService {
     }
 
     private static String getKey(final IRI identifier, final Instant time) {
+        final String version = "?version=";
         if (nonNull(time)) {
-            return join(VERSION_PARAM, identifier.getIRIString().substring(TRELLIS_DATA_PREFIX.length()),
+            return join(version, identifier.getIRIString().substring(TRELLIS_DATA_PREFIX.length()),
                     Long.toString(time.getEpochSecond()));
         }
-        return identifier.getIRIString().substring(TRELLIS_DATA_PREFIX.length()) + VERSION_PARAM;
+        return identifier.getIRIString().substring(TRELLIS_DATA_PREFIX.length()) + version;
     }
 
     private static File getTempFile() {
