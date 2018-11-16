@@ -2,7 +2,7 @@
 
 # FROM gregjan/ubuntu-openjdk8
 FROM openjdk:8-jdk
-MAINTAINER Greg Jansen <jansen@umd.edu>
+LABEL maintainer="Aaron Coburn <acoburn@apache.org>"
 
 ADD trellis-aws-*.tar /opt
 RUN mv /opt/trellis-aws-* /opt/trellis
