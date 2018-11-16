@@ -110,7 +110,7 @@ public class S3MementoService implements MementoService {
 
             try (final JenaDataset dataset = rdf.createDataset();
                     final OutputStream output = new FileOutputStream(file);
-                    final Stream<Quad> quads = resource.stream()) {
+                    final Stream<? extends Quad> quads = resource.stream()) {
                 quads.forEachOrdered(dataset::add);
 
                 if (dataset.getGraph(Trellis.PreferAccessControl).isPresent()) {
