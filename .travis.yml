@@ -19,6 +19,7 @@ jobs:
 
     allow_failures:
       - env: JOB=sonatype
+      - env: JOB=aws
 
     include:
         # JDK 8
@@ -41,4 +42,21 @@ jobs:
           if: branch = master AND type = push
           # Only automate the publication of SNAPSHOTS
           script: if [[ $(./gradlew -q getVersion) == *SNAPSHOT* ]]; then ./gradlew publish ; fi
+
+        # deploy to AWS
+        - name: "Publish JavaDocs"
+          stage: deploy
+          jdk: oraclejdk8
+          env: JOB=aws
+          if: branch = master AND type = push
+          script: ./gradlew apidocs
+          deploy:
+              provider: s3
+              access_key_id: $AWS_ACCESS_KEY
+              secret_access_key: $AWS_SECRET_KEY
+              bucket: $AWS_BUCKET
+              skip_cleanup: true
+              local_dir: docs/apidocs/$(./gradlew -q getVersion)
+              upload-dir: docs/trellis-ext-aws/$(./gradlew -q getVersion)/apidocs
+              default_text_charset: 'utf-8'
 

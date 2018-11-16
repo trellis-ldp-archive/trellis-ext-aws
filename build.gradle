@@ -50,7 +50,7 @@ allprojects { subproj ->
     ext {
         vendor = 'Trellis LDP'
         homepage = 'https://www.trellisldp.org'
-        docURL = 'https://trellis-ldp.github.io/trellis/apidocs/'
+        docURL = 'https://www.trellisldp.org/docs/trellis/current/apidocs/'
         license = 'Apache 2'
     }
 
@@ -259,7 +259,7 @@ subprojects { subproj ->
         options {
             links "https://docs.oracle.com/javase/8/docs/api/"
             links 'https://docs.oracle.com/javaee/7/api/'
-            links 'https://trellis-ldp.github.io/trellis/apidocs/'
+            links 'https://www.trellisldp.org/docs/trellis/current/apidocs/'
             links 'https://commons.apache.org/proper/commons-lang/javadocs/api-3.8/'
             links 'https://commons.apache.org/proper/commons-rdf/apidocs/'
             links 'https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/'
@@ -304,15 +304,15 @@ configure(rootProject) {
 
     task apidocs(type: Javadoc, dependsOn: getTasksByName('docs', true)) {
         outputs.upToDateWhen { false }
-        destinationDir = new File(projectDir, "docs/apidocs")
-        title = "Trellis Linked Data Server Documentation"
+        destinationDir = new File(projectDir, "docs/apidocs/${project.version}")
+        title = "Trellis Linked Data Server (Cloud Extension) Documentation"
         exclude '**/impl/*'
         exclude '**/*Tests.java'
         options {
             memberLevel = JavadocMemberLevel.PUBLIC
             links "https://docs.oracle.com/javase/8/docs/api/"
             links 'https://docs.oracle.com/javaee/7/api/'
-            links 'https://trellis-ldp.github.io/trellis/apidocs/'
+            links 'https://www.trellisldp.org/docs/trellis/current/apidocs/'
             links 'https://commons.apache.org/proper/commons-lang/javadocs/api-3.8/'
             links 'https://commons.apache.org/proper/commons-rdf/apidocs/'
             links 'https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/'
