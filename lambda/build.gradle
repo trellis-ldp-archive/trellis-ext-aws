@@ -29,6 +29,7 @@ dependencies {
     implementation project(":trellis-aws")
 
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation("org.glassfish.jersey.inject:jersey-hk2:$jerseyVersion")
 }
 
 jar {
@@ -48,5 +49,9 @@ jar {
                 resolution:=mandatory; cardinality:=at_least_one
             '''
     }
+}
+
+test {
+    systemProperty 'trellis.neptune.url', "http://example.com"
 }
 
