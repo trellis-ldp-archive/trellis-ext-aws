@@ -69,6 +69,7 @@ public class S3MementoServiceTest {
         svc.get(identifier, time).thenAccept(r -> {
             assertEquals(identifier, r.getIdentifier());
             assertEquals(LDP.RDFSource, r.getInteractionModel());
+            assertEquals(time, r.getModified());
             assertEquals(of(root), r.getContainer());
             assertTrue(r.stream().anyMatch(isEqual(quad)));
             assertFalse(r.getBinaryMetadata().isPresent());
@@ -106,6 +107,7 @@ public class S3MementoServiceTest {
         svc.get(identifier, time).thenAccept(r -> {
             assertEquals(identifier, r.getIdentifier());
             assertEquals(LDP.NonRDFSource, r.getInteractionModel());
+            assertEquals(time, r.getModified());
             assertTrue(r.stream().anyMatch(isEqual(quad)));
             assertTrue(r.getBinaryMetadata().isPresent());
             r.getBinaryMetadata().ifPresent(b -> {
