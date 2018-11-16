@@ -68,7 +68,7 @@ public class S3Resource implements Resource {
 
     @Override
     public IRI getIdentifier() {
-        return rdf.createIRI(TRELLIS_DATA_PREFIX + res.getKey());
+        return rdf.createIRI(TRELLIS_DATA_PREFIX + res.getKey().split("\\?version=")[0]);
     }
 
     @Override

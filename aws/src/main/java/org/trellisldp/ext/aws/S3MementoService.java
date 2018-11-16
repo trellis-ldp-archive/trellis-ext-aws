@@ -21,6 +21,7 @@ import static java.time.Instant.ofEpochSecond;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.unmodifiableSortedSet;
 import static java.util.Objects.nonNull;
+import static java.util.Optional.of;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static org.apache.jena.riot.Lang.NQUADS;
@@ -114,7 +115,7 @@ public class S3MementoService implements MementoService {
                     final Stream<? extends Quad> quads = resource.stream()) {
                 quads.forEachOrdered(dataset::add);
 
-                if (dataset.getGraph(Trellis.PreferAccessControl).isPresent()) {
+                if (dataset.contains(of(Trellis.PreferAccessControl), null, null, null)) {
                     metadata.put(S3Resource.HAS_ACL, "true");
                 }
                 RDFDataMgr.write(output, dataset.asJenaDatasetGraph(), NQUADS);
