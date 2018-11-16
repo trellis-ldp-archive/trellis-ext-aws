@@ -19,6 +19,7 @@ jobs:
 
     allow_failures:
       - env: JOB=sonatype
+      - env: JOB=docker
       - env: JOB=aws
 
     include:
@@ -35,6 +36,7 @@ jobs:
           jdk: oraclejdk11
           script: ./gradlew check install
 
+        # deploy to Sonatype
         - name: "Publish to Sonatype"
           stage: deploy
           jdk: oraclejdk8
@@ -42,6 +44,15 @@ jobs:
           if: branch = master AND type = push
           # Only automate the publication of SNAPSHOTS
           script: if [[ $(./gradlew -q getVersion) == *SNAPSHOT* ]]; then ./gradlew publish ; fi
+
+        # deploy to Docker hub
+        - name: "Publish to Docker hub"
+          stage: deploy
+          jdk: oraclejdk8
+          env: JOB=docker
+          if: branch = master AND type = push
+          before_script: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          script: ./gradlew dockerPush dockerPushLatest
 
         # deploy to AWS
         - name: "Publish JavaDocs"
