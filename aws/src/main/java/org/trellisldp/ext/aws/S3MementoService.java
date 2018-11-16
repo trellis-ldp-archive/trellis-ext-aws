@@ -18,7 +18,7 @@ import static java.io.File.createTempFile;
 import static java.lang.Long.parseLong;
 import static java.lang.String.join;
 import static java.time.Instant.ofEpochSecond;
-import static java.time.ChronoUnit.SECONDS;
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.unmodifiableSortedSet;
 import static java.util.Objects.nonNull;
 import static java.util.concurrent.CompletableFuture.runAsync;
@@ -144,7 +144,7 @@ public class S3MementoService implements MementoService {
                 .withPrefix(getKey(identifier, null)).withDelimiter("/");
             ObjectListing objs = client.listObjects(req);
             objs.getObjectSummaries().stream().map(S3ObjectSummary::getKey).map(this::getInstant)
-                map(i -> i.truncatedTo(SECONDS)).forEachOrdered(versions::add);
+                .map(i -> i.truncatedTo(SECONDS)).forEachOrdered(versions::add);
             while (objs.isTruncated()) {
                 objs = client.listNextBatchOfObjects(objs);
                 objs.getObjectSummaries().stream().map(S3ObjectSummary::getKey).map(this::getInstant)
