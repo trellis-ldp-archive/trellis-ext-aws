@@ -18,6 +18,7 @@ import static java.io.File.createTempFile;
 import static java.lang.Long.parseLong;
 import static java.lang.String.join;
 import static java.time.Instant.ofEpochSecond;
+import static java.time.ChronoUnit.SECONDS;
 import static java.util.Collections.unmodifiableSortedSet;
 import static java.util.Objects.nonNull;
 import static java.util.concurrent.CompletableFuture.runAsync;
@@ -62,6 +63,7 @@ import org.trellisldp.vocabulary.Trellis;
 public class S3MementoService implements MementoService {
 
     public static final String TRELLIS_MEMENTO_BUCKET = "trellis.s3.bucket.mementos";
+    private static final String VERSION_PARAM = "?version=";
 
     private static final JenaRDF rdf = new JenaRDF();
 
@@ -142,30 +144,30 @@ public class S3MementoService implements MementoService {
                 .withPrefix(getKey(identifier, null)).withDelimiter("/");
             ObjectListing objs = client.listObjects(req);
             objs.getObjectSummaries().stream().map(S3ObjectSummary::getKey).map(this::getInstant)
-                .forEachOrdered(versions::add);
+                map(i -> i.truncatedTo(SECONDS)).forEachOrdered(versions::add);
             while (objs.isTruncated()) {
                 objs = client.listNextBatchOfObjects(objs);
                 objs.getObjectSummaries().stream().map(S3ObjectSummary::getKey).map(this::getInstant)
-                    .forEachOrdered(versions::add);
+                    .map(i -> i.truncatedTo(SECONDS)).forEachOrdered(versions::add);
             }
             return unmodifiableSortedSet(versions);
         });
     }
 
     private Instant getInstant(final String key) {
-        final String[] parts = key.split("?version=", 2);
+        final String[] parts = key.split(VERSION_PARAM, 2);
         if (parts.length == 2) {
-            return ofEpochSecond(parseLong(parts[1]));
+            return ofEpochSecond(parseLong(parts[1])).truncatedTo(SECONDS);
         }
         return null;
     }
 
     private static String getKey(final IRI identifier, final Instant time) {
         if (nonNull(time)) {
-            return join("?version=", identifier.getIRIString().substring(TRELLIS_DATA_PREFIX.length()),
+            return join(VERSION_PARAM, identifier.getIRIString().substring(TRELLIS_DATA_PREFIX.length()),
                     Long.toString(time.getEpochSecond()));
         }
-        return identifier.getIRIString().substring(TRELLIS_DATA_PREFIX.length()) + "?version=";
+        return identifier.getIRIString().substring(TRELLIS_DATA_PREFIX.length()) + VERSION_PARAM;
     }
 
     private static File getTempFile() {
