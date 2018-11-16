@@ -67,3 +67,6 @@ jar {
     }
 }
 
+test {
+    systemProperty 'trellis.build.dir', project.buildDir
+}
