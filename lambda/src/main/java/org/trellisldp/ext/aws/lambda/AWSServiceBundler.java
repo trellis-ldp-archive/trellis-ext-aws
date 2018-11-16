@@ -88,13 +88,13 @@ public class AWSServiceBundler implements ServiceBundler {
     }
 
     @Override
-    public BinaryService getBinaryService() {
-        return binaryService;
+    public MementoService getMementoService() {
+        return mementoService;
     }
 
     @Override
-    public MementoService getMementoService() {
-        return mementoService;
+    public BinaryService getBinaryService() {
+        return binaryService;
     }
 
     @Override

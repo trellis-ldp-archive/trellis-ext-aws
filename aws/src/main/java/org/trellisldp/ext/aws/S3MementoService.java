@@ -23,7 +23,6 @@ import static java.util.Objects.nonNull;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static org.apache.jena.riot.Lang.NQUADS;
-import static org.slf4j.LoggerFactory.getLogger;
 import static org.trellisldp.api.TrellisUtils.TRELLIS_DATA_PREFIX;
 
 import com.amazonaws.services.s3.AmazonS3;
@@ -44,22 +43,17 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.api.Literal;
-import org.apache.commons.rdf.api.RDFTerm;
-import org.apache.commons.rdf.api.Triple;
+import org.apache.commons.rdf.api.Quad;
 import org.apache.commons.rdf.jena.JenaDataset;
 import org.apache.commons.rdf.jena.JenaRDF;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.tamaya.ConfigurationProvider;
-import org.slf4j.Logger;
 import org.trellisldp.api.MementoService;
 import org.trellisldp.api.Resource;
 import org.trellisldp.api.RuntimeTrellisException;
-import org.trellisldp.vocabulary.DC;
-import org.trellisldp.vocabulary.LDP;
-import org.trellisldp.vocabulary.RDF;
 import org.trellisldp.vocabulary.Trellis;
 
 /**
@@ -69,7 +63,6 @@ public class S3MementoService implements MementoService {
 
     public static final String TRELLIS_MEMENTO_BUCKET = "trellis.s3.bucket.mementos";
 
-    private static final Logger LOGGER = getLogger(S3MementoService.class);
     private static final JenaRDF rdf = new JenaRDF();
 
     private final Map<IRI, String> propertyMapping = new HashMap<>();
@@ -91,10 +84,6 @@ public class S3MementoService implements MementoService {
     public S3MementoService(final String bucketName, final AmazonS3 client) {
         this.bucketName = bucketName;
         this.client = client;
-        propertyMapping.put(LDP.membershipResource, S3Resource.MEMBERSHIP_RESOURCE);
-        propertyMapping.put(LDP.hasMemberRelation, S3Resource.MEMBER_RELATION);
-        propertyMapping.put(LDP.isMemberOfRelation, S3Resource.MEMBER_OF_RELATION);
-        propertyMapping.put(LDP.insertedContentRelation, S3Resource.INSERTED_CONTENT_RELATION);
     }
 
     @Override
@@ -102,45 +91,28 @@ public class S3MementoService implements MementoService {
         return runAsync(() -> {
             final File file = getTempFile();
             final Map<String, String> metadata = new HashMap<>();
+            metadata.put(S3Resource.INTERACTION_MODEL, resource.getInteractionModel().getIRIString());
+            metadata.put(S3Resource.MODIFIED, resource.getModified().toString());
+            resource.getContainer().map(IRI::getIRIString).ifPresent(c -> metadata.put(S3Resource.CONTAINER, c));
+            resource.getBinaryMetadata().ifPresent(b -> {
+                metadata.put(S3Resource.BINARY_LOCATION, b.getIdentifier().getIRIString());
+                b.getMimeType().ifPresent(m -> metadata.put(S3Resource.BINARY_TYPE, m));
+                b.getSize().ifPresent(s -> metadata.put(S3Resource.BINARY_SIZE, Long.toString(s)));
+            });
+            resource.getMembershipResource().map(IRI::getIRIString)
+                .ifPresent(m -> metadata.put(S3Resource.MEMBERSHIP_RESOURCE, m));
+            resource.getMemberRelation().map(IRI::getIRIString)
+                .ifPresent(m -> metadata.put(S3Resource.MEMBER_RELATION, m));
+            resource.getMemberOfRelation().map(IRI::getIRIString)
+                .ifPresent(m -> metadata.put(S3Resource.MEMBER_OF_RELATION, m));
+            resource.getInsertedContentRelation().map(IRI::getIRIString)
+                .ifPresent(m -> metadata.put(S3Resource.INSERTED_CONTENT_RELATION, m));
+
             try (final JenaDataset dataset = rdf.createDataset();
-                    final OutputStream output = new FileOutputStream(file)) {
-                resource.stream().forEachOrdered(dataset::add);
-                dataset.getGraph(Trellis.PreferServerManaged).ifPresent(graph -> {
-                    graph.stream(resource.getIdentifier(), null, null).forEachOrdered(triple -> {
-                        final RDFTerm obj = triple.getObject();
-                        if (RDF.type.equals(triple.getPredicate()) && obj instanceof IRI) {
-                            metadata.put(S3Resource.INTERACTION_MODEL, ((IRI) obj).getIRIString());
-                        } else if (DC.modified.equals(triple.getPredicate()) && obj instanceof Literal) {
-                            metadata.put(S3Resource.MODIFIED, ((Literal) obj).getLexicalForm());
-                        } else if (DC.isPartOf.equals(triple.getPredicate()) && obj instanceof IRI) {
-                            metadata.put(S3Resource.CONTAINER, ((IRI) obj).getIRIString());
-                        }
-                    });
-                    graph.stream(resource.getIdentifier(), DC.hasPart, null).findFirst().map(Triple::getObject)
-                            .ifPresent(id -> {
-                        if (id instanceof IRI) {
-                            graph.stream((IRI) id, null, null).forEachOrdered(triple -> {
-                                final RDFTerm obj = triple.getObject();
-                                if (DC.extent.equals(triple.getPredicate()) && obj instanceof Literal) {
-                                    metadata.put(S3Resource.BINARY_SIZE, ((Literal) obj).getLexicalForm());
-                                } else if (DC.format.equals(triple.getPredicate()) && obj instanceof Literal) {
-                                    metadata.put(S3Resource.BINARY_TYPE, ((Literal) obj).getLexicalForm());
-                                } else if (DC.modified.equals(triple.getPredicate()) && obj instanceof Literal) {
-                                    metadata.put(S3Resource.BINARY_LOCATION, ((IRI) id).getIRIString());
-                                    metadata.put(S3Resource.BINARY_DATE, ((Literal) obj).getLexicalForm());
-                                }
-                            });
-                        }
-                    });
-                });
-                dataset.getGraph(Trellis.PreferUserManaged).ifPresent(graph -> {
-                    graph.stream(resource.getIdentifier(), null, null).forEachOrdered(triple -> {
-                        final RDFTerm obj = triple.getObject();
-                        if (propertyMapping.containsKey(triple.getPredicate()) && obj instanceof IRI) {
-                            metadata.put(propertyMapping.get(triple.getPredicate()), ((IRI) obj).getIRIString());
-                        }
-                    });
-                });
+                    final OutputStream output = new FileOutputStream(file);
+                    final Stream<Quad> quads = resource.stream()) {
+                quads.forEachOrdered(dataset::add);
+
                 if (dataset.getGraph(Trellis.PreferAccessControl).isPresent()) {
                     metadata.put(S3Resource.HAS_ACL, "true");
                 }
