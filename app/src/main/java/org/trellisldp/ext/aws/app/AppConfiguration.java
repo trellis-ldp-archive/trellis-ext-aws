@@ -22,52 +22,10 @@ import org.trellisldp.app.config.TrellisConfiguration;
 public class AppConfiguration extends TrellisConfiguration {
 
     @NotNull
-    private String mementos;
-
-    @NotNull
-    private String binaries;
-
-    @NotNull
     private String namespaces;
 
     @NotNull
     private String resourceLocation;
-
-    /**
-     * Get the Memento configuration.
-     * @return the Memento resource location
-     */
-    @JsonProperty
-    public String getMementos() {
-        return mementos;
-    }
-
-    /**
-     * Set the Memento resource configuration.
-     * @param config the Memento resource location
-     */
-    @JsonProperty
-    public void setMementos(final String config) {
-        this.mementos = config;
-    }
-
-    /**
-     * Get the binary configuration.
-     * @return the binary configuration
-     */
-    @JsonProperty
-    public String getBinaries() {
-        return binaries;
-    }
-
-    /**
-     * Set the binary configuration.
-     * @param config the binary configuration
-     */
-    @JsonProperty
-    public void setBinaries(final String config) {
-        this.binaries = config;
-    }
 
     /**
      * Set the RDF Connection configuration.

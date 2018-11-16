@@ -26,10 +26,6 @@ logging:
 
 resources: https://example.com
 
-binaries: binaries
-
-mementos: mementos
-
 namespaces: namespaces.json
 
 # This may refer to a static base URL for resources. If left empty, the
