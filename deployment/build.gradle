@@ -64,7 +64,7 @@ buildDeb {
 }
 
 docker {
-    name "trellisldp/trellis-ext-aws:${trellisVersion}"
+    name "trellisldp/trellis-ext-aws:${project.version}"
     tags 'latest'
     dockerfile file('src/docker/Dockerfile')
     files tasks.distTar.outputs, './src/dist/etc/config.yml','./src/docker/command.sh'
