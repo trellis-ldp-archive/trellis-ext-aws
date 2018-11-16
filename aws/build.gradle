@@ -44,3 +44,7 @@ jar {
     }
 }
 
+test {
+    systemProperty "trellis.ns-test", "http://example.com/test/"
+}
+

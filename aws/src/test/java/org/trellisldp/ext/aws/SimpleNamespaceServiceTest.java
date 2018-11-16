@@ -24,8 +24,16 @@ public class SimpleNamespaceServiceTest {
     @Test
     public void testNamespace() {
         final NamespaceService svc = new SimpleNamespaceService();
-        assertEquals(14, svc.getNamespaces().size());
+        assertEquals(15, svc.getNamespaces().size());
         assertTrue(svc.setPrefix("foo", "bar"));
-        assertEquals(14, svc.getNamespaces().size());
+        assertEquals(15, svc.getNamespaces().size());
+    }
+
+    @Test
+    public void testEnvNamespace() {
+        final NamespaceService svc = new SimpleNamespaceService();
+        final String ns = "http://example.com/test/";
+        assertEquals(ns, System.getProperty("trellis.ns-test"));
+        assertEquals(ns, svc.getNamespaces().get("test"));
     }
 }
