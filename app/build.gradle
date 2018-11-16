@@ -26,7 +26,6 @@ dependencies {
     compile("org.trellisldp:trellis-constraint-rules:$trellisVersion")
     compile("org.trellisldp:trellis-event-serialization:$trellisVersion")
     compile("org.trellisldp:trellis-http:$trellisVersion")
-    compile("org.trellisldp:trellis-id:$trellisVersion")
     compile("org.trellisldp:trellis-io-jena:$trellisVersion")
     compile("org.trellisldp:trellis-namespaces:$trellisVersion")
     compile("org.trellisldp:trellis-triplestore:$trellisVersion")

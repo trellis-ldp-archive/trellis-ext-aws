@@ -20,7 +20,6 @@ dependencies {
     implementation("org.trellisldp:trellis-audit:$trellisVersion")
     implementation("org.trellisldp:trellis-constraint-rules:$trellisVersion")
     implementation("org.trellisldp:trellis-event-serialization:$trellisVersion")
-    implementation("org.trellisldp:trellis-id:$trellisVersion")
     implementation("org.trellisldp:trellis-io-jena:$trellisVersion")
     implementation("org.trellisldp:trellis-http:$trellisVersion")
     implementation("org.trellisldp:trellis-rdfa:$trellisVersion")

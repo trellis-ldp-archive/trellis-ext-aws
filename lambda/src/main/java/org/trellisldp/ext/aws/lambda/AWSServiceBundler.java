@@ -31,7 +31,6 @@ import org.trellisldp.ext.aws.S3BinaryService;
 import org.trellisldp.ext.aws.S3MementoService;
 import org.trellisldp.ext.aws.SNSEventService;
 import org.trellisldp.ext.aws.SimpleNamespaceService;
-import org.trellisldp.id.UUIDGenerator;
 import org.trellisldp.io.JenaIOService;
 import org.trellisldp.rdfa.HtmlSerializer;
 import org.trellisldp.triplestore.TriplestoreResourceService;
@@ -64,7 +63,7 @@ public class AWSServiceBundler implements ServiceBundler {
         binaryService = new S3BinaryService();
         mementoService = new S3MementoService();
         ioService = new JenaIOService(nsService, new HtmlSerializer(nsService));
-        auditService = resourceService = new TriplestoreResourceService(rdfConnection, new UUIDGenerator());
+        auditService = resourceService = new TriplestoreResourceService(rdfConnection);
     }
 
     @Override
