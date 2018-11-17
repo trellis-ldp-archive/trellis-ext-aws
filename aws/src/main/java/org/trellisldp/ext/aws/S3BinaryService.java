@@ -16,6 +16,7 @@ package org.trellisldp.ext.aws;
 import static com.amazonaws.services.s3.AmazonS3ClientBuilder.defaultClient;
 import static java.util.Arrays.asList;
 import static java.util.Base64.getEncoder;
+import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.stream.Collectors.toSet;
@@ -109,6 +110,8 @@ public class S3BinaryService implements BinaryService {
         return runAsync(() -> {
             final ObjectMetadata md = new ObjectMetadata();
             md.setUserMetadata(metadata);
+            ofNullable(metadata.get("Content-Type")).ifPresent(md::setContentType);
+            ofNullable(metadata.get("Content-Length")).map(Long::parseLong).ifPresent(md::setContentLength);
             client.putObject(bucketName, getKey(identifier), stream, md);
         });
     }
