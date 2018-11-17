@@ -96,10 +96,10 @@ public class S3BinaryServiceTest {
     public void testInvalidIdentifier() {
         final IRI identifier = rdf.createIRI("file://binaries/" + base + "/resource");
         final BinaryService svc = new S3BinaryService();
-        svc.getContent(identifier).handle((v, err) -> {
+        assertDoesNotThrow(svc.getContent(identifier).handle((v, err) -> {
             assertNotNull(err);
             return null;
-        });
+        })::join);
     }
 
     @Test
