@@ -28,6 +28,7 @@ ext {
     activationVersion = '1.1.1'
     apiguardianVersion = '1.0.0'
     checkstyleVersion = '8.12'
+    commonsIoVersion = '2.6'
     commonsTextVersion = '1.6'
     jacocoVersion = '0.8.2'
     jaxbVersion = '2.3.0'
