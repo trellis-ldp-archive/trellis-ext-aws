@@ -22,6 +22,7 @@ dependencies {
     implementation("org.trellisldp:trellis-id:$trellisVersion")
     implementation("org.trellisldp:trellis-vocabulary:$trellisVersion")
 
+    testImplementation("org.apache.commons:commons-text:$commonsTextVersion")
     testImplementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
 }
@@ -47,6 +48,6 @@ jar {
 
 test {
     systemProperty "trellis.ns-test", "http://example.com/test/"
-    systemProperty "trellis.s3.bucket.mementos", "test.trellisldp.org"
+    systemProperty "trellis.s3.bucket.mementos", System.getenv("AWS_TEST_BUCKET") ?: "test.trellisldp.org"
 }
 

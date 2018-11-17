@@ -13,6 +13,7 @@
  */
 package org.trellisldp.ext.aws;
 
+import static com.amazonaws.services.s3.AmazonS3ClientBuilder.defaultClient;
 import static java.time.Instant.now;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -26,12 +27,18 @@ import static org.mockito.Mockito.when;
 import static org.trellisldp.api.TrellisUtils.TRELLIS_DATA_PREFIX;
 import static org.trellisldp.api.TrellisUtils.getInstance;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
+
 import java.time.Instant;
 import java.util.stream.Stream;
 
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.Quad;
 import org.apache.commons.rdf.api.RDF;
+import org.apache.commons.text.RandomStringGenerator;
+import org.apache.tamaya.ConfigurationProvider;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.trellisldp.api.BinaryMetadata;
 import org.trellisldp.api.MementoService;
@@ -45,10 +52,21 @@ public class S3MementoServiceTest {
 
     private static final RDF rdf = getInstance();
     private static final IRI root = rdf.createIRI(TRELLIS_DATA_PREFIX);
+    private static final Integer length = 10;
+    private static final String base = new RandomStringGenerator.Builder().withinRange('a', 'z')
+        .build().generate(length);
+
+    @AfterAll
+    public static void tearDown() throws Exception {
+        final AmazonS3 client = defaultClient();
+        final String bucket = ConfigurationProvider.getConfiguration().get(S3MementoService.TRELLIS_MEMENTO_BUCKET);
+        client.listObjects(bucket, "mementos/" + base).getObjectSummaries().stream()
+            .map(S3ObjectSummary::getKey).forEach(key -> client.deleteObject(bucket, key));
+    }
 
     @Test
     public void testMementoRDFSource() {
-        final IRI identifier = rdf.createIRI(TRELLIS_DATA_PREFIX + "resource");
+        final IRI identifier = rdf.createIRI(TRELLIS_DATA_PREFIX + "mementos/" + base + "/resource");
         final Resource res = mock(Resource.class);
         final Instant time = now();
         final Quad quad = rdf.createQuad(Trellis.PreferUserManaged, identifier, DC.title, rdf.createLiteral("Title"));
@@ -85,7 +103,7 @@ public class S3MementoServiceTest {
 
     @Test
     public void testMementoNonRDFSource() {
-        final IRI identifier = rdf.createIRI(TRELLIS_DATA_PREFIX + "binary");
+        final IRI identifier = rdf.createIRI(TRELLIS_DATA_PREFIX + "mementos/" + base + "/binary");
         final BinaryMetadata binary = BinaryMetadata.builder(rdf.createIRI("s3://bucket/binary")).mimeType("text/plain")
             .size(40L).build();
         final Resource res = mock(Resource.class);
