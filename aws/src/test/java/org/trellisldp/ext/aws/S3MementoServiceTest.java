@@ -143,4 +143,43 @@ public class S3MementoServiceTest {
 
         svc.mementos(identifier).thenAccept(mementos -> assertTrue(mementos.contains(time)));
     }
+
+    @Test
+    public void testMementoIndirectContainer() {
+        final IRI identifier = rdf.createIRI(TRELLIS_DATA_PREFIX + "mementos/" + base + "/container");
+        final IRI member = rdf.createIRI(TRELLIS_DATA_PREFIX + "mementos/" + base + "/resource");
+        final Resource res = mock(Resource.class);
+        final Instant time = now();
+        final Quad quad = rdf.createQuad(Trellis.PreferUserManaged, identifier, DC.title, rdf.createLiteral("Title"));
+        final Quad acl = rdf.createQuad(Trellis.PreferAccessControl, identifier, ACL.mode, ACL.Write);
+        when(res.getModified()).thenReturn(time);
+        when(res.getIdentifier()).thenReturn(identifier);
+        when(res.getContainer()).thenReturn(of(root));
+        when(res.getInteractionModel()).thenReturn(LDP.IndirectContainer);
+        when(res.getBinaryMetadata()).thenReturn(empty());
+        when(res.getMembershipResource()).thenReturn(of(member));
+        when(res.getMemberRelation()).thenReturn(of(LDP.member));
+        when(res.getMemberOfRelation()).thenReturn(of(DC.isPartOf));
+        when(res.getInsertedContentRelation()).thenReturn(of(LDP.MemberSubject));
+        when(res.stream()).thenAnswer(inv -> Stream.of(quad, acl));
+
+        final MementoService svc = new S3MementoService();
+        assertDoesNotThrow(svc.put(res)::join);
+        svc.get(identifier, time).thenAccept(r -> {
+            assertEquals(identifier, r.getIdentifier());
+            assertEquals(LDP.IndirectContainer, r.getInteractionModel());
+            assertEquals(time, r.getModified());
+            assertEquals(of(root), r.getContainer());
+            assertTrue(r.stream().anyMatch(isEqual(quad)));
+            assertFalse(r.getBinaryMetadata().isPresent());
+            assertEquals(of(member), r.getMembershipResource());
+            assertEquals(of(LDP.member), r.getMemberRelation());
+            assertEquals(of(DC.isPartOf), r.getMemberOfRelation());
+            assertEquals(of(LDP.MemberSubject), r.getInsertedContentRelation());
+            assertTrue(r.hasAcl());
+        }).join();
+
+        svc.mementos(identifier).thenAccept(mementos -> assertTrue(mementos.contains(time)));
+    }
+
 }
