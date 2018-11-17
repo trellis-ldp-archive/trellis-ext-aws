@@ -9,5 +9,5 @@ of the ElasticBeanstalk service, as a Lambda service or running it directly acro
 
 ## Requirements
 
-* Java 8 or later
-* An AWS account
+  * Java 8 or later
+  * An AWS account
