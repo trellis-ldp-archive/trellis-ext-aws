@@ -16,6 +16,7 @@ package org.trellisldp.ext.aws;
 import static com.amazonaws.services.s3.AmazonS3ClientBuilder.defaultClient;
 import static java.util.Arrays.asList;
 import static java.util.Base64.getEncoder;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
@@ -31,6 +32,7 @@ import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_1;
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_256;
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_384;
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_512;
+import static org.apache.tamaya.ConfigurationProvider.getConfiguration;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.amazonaws.services.s3.AmazonS3;
@@ -46,7 +48,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.rdf.api.IRI;
-import org.apache.tamaya.ConfigurationProvider;
+import org.apache.tamaya.Configuration;
 import org.slf4j.Logger;
 import org.trellisldp.api.BinaryService;
 import org.trellisldp.api.IdentifierService;
@@ -58,8 +60,10 @@ import org.trellisldp.id.UUIDGenerator;
  */
 public class S3BinaryService implements BinaryService {
 
-    public static final String TRELLIS_BINARY_BUCKET = "trellis.s3.bucket.binaries";
+    public static final String TRELLIS_BINARY_BUCKET = "trellis.s3.binary.bucket";
+    public static final String TRELLIS_BINARY_PATH_PREFIX = "trellis.s3.binary.path.prefix";
 
+    private static final Configuration config = getConfiguration();
     private static final String PREFIX = "s3://";
     private static final String SHA = "SHA";
     private static final Logger LOGGER = getLogger(S3BinaryService.class);
@@ -70,22 +74,25 @@ public class S3BinaryService implements BinaryService {
     private final IdentifierService idService = new UUIDGenerator();
     private final AmazonS3 client;
     private final String bucketName;
+    private final String pathPrefix;
 
     /**
      * Create an S3-based binary service.
      */
     public S3BinaryService() {
-        this(ConfigurationProvider.getConfiguration().get(TRELLIS_BINARY_BUCKET), defaultClient());
+        this(defaultClient(), config.get(TRELLIS_BINARY_BUCKET), config.get(TRELLIS_BINARY_PATH_PREFIX));
     }
 
     /**
      * Create an S3-based binary service.
-     * @param bucketName the bucket name
      * @param client the client
+     * @param bucketName the bucket name
+     * @param pathPrefix the path prefix, may be {@code null}
      */
-    public S3BinaryService(final String bucketName, final AmazonS3 client) {
-        this.bucketName = bucketName;
-        this.client = client;
+    public S3BinaryService(final AmazonS3 client, final String bucketName, final String pathPrefix) {
+        this.client = requireNonNull(client, "client may not be null!");
+        this.bucketName = requireNonNull(bucketName, "bucket name may not be null!");
+        this.pathPrefix = ofNullable(pathPrefix).orElse("");
     }
 
     @Override
@@ -147,10 +154,10 @@ public class S3BinaryService implements BinaryService {
         }
     }
 
-    private static String getKey(final IRI identifier) {
+    private String getKey(final IRI identifier) {
         final String id = identifier.getIRIString();
         if (id.startsWith(PREFIX)) {
-            return id.substring(PREFIX.length());
+            return pathPrefix + id.substring(PREFIX.length());
         }
         throw new RuntimeTrellisException("Invalid identifier: " + identifier);
     }

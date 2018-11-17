@@ -19,10 +19,13 @@ import static java.lang.String.join;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.unmodifiableSortedSet;
 import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static org.apache.jena.riot.Lang.NQUADS;
+import static org.apache.tamaya.ConfigurationProvider.getConfiguration;
 import static org.trellisldp.api.TrellisUtils.TRELLIS_DATA_PREFIX;
 
 import com.amazonaws.services.s3.AmazonS3;
@@ -50,7 +53,7 @@ import org.apache.commons.rdf.api.Quad;
 import org.apache.commons.rdf.jena.JenaDataset;
 import org.apache.commons.rdf.jena.JenaRDF;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.tamaya.ConfigurationProvider;
+import org.apache.tamaya.Configuration;
 import org.trellisldp.api.MementoService;
 import org.trellisldp.api.Resource;
 import org.trellisldp.api.RuntimeTrellisException;
@@ -61,28 +64,33 @@ import org.trellisldp.vocabulary.Trellis;
  */
 public class S3MementoService implements MementoService {
 
-    public static final String TRELLIS_MEMENTO_BUCKET = "trellis.s3.bucket.mementos";
+    public static final String TRELLIS_MEMENTO_BUCKET = "trellis.s3.memento.bucket";
+    public static final String TRELLIS_MEMENTO_PATH_PREFIX = "trellis.s3.memento.path.prefix";
 
     private static final JenaRDF rdf = new JenaRDF();
+    private static final Configuration config = getConfiguration();
 
     private final AmazonS3 client;
     private final String bucketName;
+    private final String pathPrefix;
 
     /**
      * Create an S3-based memento service.
      */
     public S3MementoService() {
-        this(ConfigurationProvider.getConfiguration().get(TRELLIS_MEMENTO_BUCKET), defaultClient());
+        this(defaultClient(), config.get(TRELLIS_MEMENTO_BUCKET), config.get(TRELLIS_MEMENTO_PATH_PREFIX));
     }
 
     /**
      * Create an S3-based memento service.
-     * @param bucketName the bucket name
      * @param client the client
+     * @param bucketName the bucket name
+     * @param pathPrefix the path prefix for mementos, may be {@code null}
      */
-    public S3MementoService(final String bucketName, final AmazonS3 client) {
-        this.bucketName = bucketName;
-        this.client = client;
+    public S3MementoService(final AmazonS3 client, final String bucketName, final String pathPrefix) {
+        this.client = requireNonNull(client, "Client may not be null!");
+        this.bucketName = requireNonNull(bucketName, "AWS Bucket may not be null!");
+        this.pathPrefix = ofNullable(pathPrefix).orElse("");
     }
 
     @Override
@@ -157,13 +165,13 @@ public class S3MementoService implements MementoService {
             .map(Long::parseLong).map(Instant::ofEpochSecond).map(i -> i.truncatedTo(SECONDS)).orElse(null);
     }
 
-    private static String getKey(final IRI identifier, final Instant time) {
+    private String getKey(final IRI identifier, final Instant time) {
         final String version = "?version=";
         if (nonNull(time)) {
-            return join(version, identifier.getIRIString().substring(TRELLIS_DATA_PREFIX.length()),
+            return pathPrefix + join(version, identifier.getIRIString().substring(TRELLIS_DATA_PREFIX.length()),
                     Long.toString(time.getEpochSecond()));
         }
-        return identifier.getIRIString().substring(TRELLIS_DATA_PREFIX.length()) + version;
+        return pathPrefix + identifier.getIRIString().substring(TRELLIS_DATA_PREFIX.length()) + version;
     }
 
     private static File getTempFile() {
