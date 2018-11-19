@@ -37,6 +37,7 @@ import org.apache.commons.text.RandomStringGenerator;
 import org.apache.tamaya.ConfigurationProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.trellisldp.api.BinaryMetadata;
 import org.trellisldp.api.BinaryService;
 
 public class S3BinaryServiceTest {
@@ -59,7 +60,8 @@ public class S3BinaryServiceTest {
         final IRI identifier = rdf.createIRI("s3://binaries/" + base + "/resource");
         final BinaryService svc = new S3BinaryService();
         final InputStream input = getClass().getResourceAsStream("/file.txt");
-        assertDoesNotThrow(svc.setContent(identifier, input)::join);
+        assertDoesNotThrow(svc.setContent(BinaryMetadata.builder(identifier).mimeType("text/plain").build(),
+                    input)::join);
         svc.getContent(identifier).thenAccept(content -> {
             try {
                 assertEquals("A sample binary file.", IOUtils.toString(content, UTF_8).trim());

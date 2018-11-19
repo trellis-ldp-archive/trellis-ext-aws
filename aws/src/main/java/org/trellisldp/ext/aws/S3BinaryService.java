@@ -43,13 +43,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.security.MessageDigest;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.rdf.api.IRI;
 import org.apache.tamaya.Configuration;
 import org.slf4j.Logger;
+import org.trellisldp.api.BinaryMetadata;
 import org.trellisldp.api.BinaryService;
 import org.trellisldp.api.IdentifierService;
 import org.trellisldp.api.RuntimeTrellisException;
@@ -112,14 +112,12 @@ public class S3BinaryService implements BinaryService {
     }
 
     @Override
-    public CompletableFuture<Void> setContent(final IRI identifier, final InputStream stream,
-            final Map<String, String> metadata) {
+    public CompletableFuture<Void> setContent(final BinaryMetadata metadata, final InputStream stream) {
         return runAsync(() -> {
             final ObjectMetadata md = new ObjectMetadata();
-            md.setUserMetadata(metadata);
-            ofNullable(metadata.get("Content-Type")).ifPresent(md::setContentType);
-            ofNullable(metadata.get("Content-Length")).map(Long::parseLong).ifPresent(md::setContentLength);
-            client.putObject(bucketName, getKey(identifier), stream, md);
+            metadata.getMimeType().ifPresent(md::setContentType);
+            metadata.getSize().ifPresent(md::setContentLength);
+            client.putObject(bucketName, getKey(metadata.getIdentifier()), stream, md);
         });
     }
 
