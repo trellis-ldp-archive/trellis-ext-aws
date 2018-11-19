@@ -97,6 +97,7 @@ public class S3MementoService implements MementoService {
     public CompletableFuture<Void> put(final Resource resource) {
         return runAsync(() -> {
             final File file = getTempFile();
+            file.deleteOnExit();
             final Map<String, String> metadata = new HashMap<>();
             metadata.put(S3Resource.INTERACTION_MODEL, resource.getInteractionModel().getIRIString());
             metadata.put(S3Resource.MODIFIED, resource.getModified().toString());
@@ -133,6 +134,7 @@ public class S3MementoService implements MementoService {
             final PutObjectRequest req = new PutObjectRequest(bucketName, getKey(resource.getIdentifier(),
                         resource.getModified()), file);
             client.putObject(req.withMetadata(md));
+            file.delete();
         });
     }
 
