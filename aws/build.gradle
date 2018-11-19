@@ -14,6 +14,7 @@ dependencies {
     api("com.amazonaws:aws-java-sdk-sns:$awsVersion")
 
     implementation("commons-codec:commons-codec:$commonsCodecVersion")
+    implementation("commons-io:commons-io:$commonsIoVersion")
     implementation("org.apache.commons:commons-compress:$commonsCompressVersion")
     implementation("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
     implementation("org.apache.jena:jena-osgi:$jenaVersion")
@@ -25,7 +26,6 @@ dependencies {
     testImplementation("org.apache.commons:commons-text:$commonsTextVersion")
     testImplementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
-    testImplementation("commons-io:commons-io:$commonsIoVersion")
 }
 
 jar {
