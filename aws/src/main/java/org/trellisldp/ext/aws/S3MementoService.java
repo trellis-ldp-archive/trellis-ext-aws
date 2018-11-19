@@ -40,6 +40,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -134,7 +135,11 @@ public class S3MementoService implements MementoService {
             final PutObjectRequest req = new PutObjectRequest(bucketName, getKey(resource.getIdentifier(),
                         resource.getModified()), file);
             client.putObject(req.withMetadata(md));
-            file.delete();
+            try {
+                Files.delete(file.toPath());
+            } catch (final IOException ex) {
+                throw new RuntimeTrellisException("Error deleting locally buffered file", ex);
+            }
         });
     }
 
