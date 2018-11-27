@@ -62,17 +62,19 @@ public class S3BinaryServiceTest {
         final InputStream input = getClass().getResourceAsStream("/file.txt");
         assertDoesNotThrow(svc.setContent(BinaryMetadata.builder(identifier).mimeType("text/plain").build(),
                     input)::join);
-        svc.getContent(identifier).thenAccept(content -> {
+        svc.get(identifier).thenAccept(binary -> {
+            assertEquals((Long) 22L, binary.getSize());
             try {
-                assertEquals("A sample binary file.", IOUtils.toString(content, UTF_8).trim());
+                assertEquals("A sample binary file.", IOUtils.toString(binary.getContent(), UTF_8).trim());
             } catch (final IOException ex) {
                 fail("Error reading IO stream", ex);
             }
         }).join();
 
-        svc.getContent(identifier, 5, 10).thenAccept(content -> {
+        svc.get(identifier).thenAccept(binary -> {
+            assertEquals((Long) 22L, binary.getSize());
             try {
-                assertEquals("ple bi", IOUtils.toString(content, UTF_8).trim());
+                assertEquals("ple bi", IOUtils.toString(binary.getContent(5, 10), UTF_8).trim());
             } catch (final IOException ex) {
                 fail("Error reading IO stream", ex);
             }
@@ -98,7 +100,7 @@ public class S3BinaryServiceTest {
     public void testInvalidIdentifier() {
         final IRI identifier = rdf.createIRI("file://binaries/" + base + "/resource");
         final BinaryService svc = new S3BinaryService();
-        assertDoesNotThrow(svc.getContent(identifier).handle((v, err) -> {
+        assertDoesNotThrow(svc.get(identifier).handle((v, err) -> {
             assertNotNull(err);
             return null;
         })::join);

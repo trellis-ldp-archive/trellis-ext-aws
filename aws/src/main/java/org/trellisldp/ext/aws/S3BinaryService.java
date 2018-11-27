@@ -36,7 +36,6 @@ import static org.apache.tamaya.ConfigurationProvider.getConfiguration;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 
@@ -55,6 +54,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.tamaya.Configuration;
 import org.slf4j.Logger;
+import org.trellisldp.api.Binary;
 import org.trellisldp.api.BinaryMetadata;
 import org.trellisldp.api.BinaryService;
 import org.trellisldp.api.IdentifierService;
@@ -102,14 +102,8 @@ public class S3BinaryService implements BinaryService {
     }
 
     @Override
-    public CompletableFuture<InputStream> getContent(final IRI identifier) {
-        return supplyAsync(() -> client.getObject(bucketName, getKey(identifier)).getObjectContent());
-    }
-
-    @Override
-    public CompletableFuture<InputStream> getContent(final IRI identifier, final Integer from, final Integer to) {
-        return supplyAsync(() -> client.getObject(new GetObjectRequest(bucketName, getKey(identifier))
-                    .withRange(from, to)).getObjectContent());
+    public CompletableFuture<Binary> get(final IRI identifier) {
+        return supplyAsync(() -> new S3Binary(client, client.getObject(bucketName, getKey(identifier))));
     }
 
     @Override
