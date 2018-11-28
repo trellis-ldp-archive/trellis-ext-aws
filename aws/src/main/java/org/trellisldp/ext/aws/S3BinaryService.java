@@ -14,6 +14,7 @@
 package org.trellisldp.ext.aws;
 
 import static com.amazonaws.services.s3.AmazonS3ClientBuilder.defaultClient;
+import static java.nio.file.StandardOpenOption.WRITE;
 import static java.util.Arrays.asList;
 import static java.util.Base64.getEncoder;
 import static java.util.Objects.requireNonNull;
@@ -39,13 +40,12 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -114,25 +114,11 @@ public class S3BinaryService implements BinaryService {
     @Override
     public CompletableFuture<Void> setContent(final BinaryMetadata metadata, final InputStream stream) {
         return runAsync(() -> {
-            // Buffer the file locally so that the PUT request can be parallelized for large objects
             try {
-                final File file;
-                file = File.createTempFile("trellis-binary", ".tmp");
-                file.deleteOnExit();
-
-                try (final OutputStream output = new FileOutputStream(file)) {
-                    IOUtils.copy(stream, output);
-                }
-                final ObjectMetadata md = new ObjectMetadata();
-                metadata.getMimeType().ifPresent(md::setContentType);
-                final PutObjectRequest req = new PutObjectRequest(bucketName, getKey(metadata.getIdentifier()), file)
-                    .withMetadata(md);
-                client.putObject(req);
-                Files.delete(file.toPath());
+                bufferUpload(metadata, stream, Files.createTempFile("trellis-binary", ".tmp"));
             } catch (final IOException ex) {
                 throw new UncheckedIOException("Error buffering binary to local file", ex);
             }
-
         });
     }
 
@@ -157,6 +143,23 @@ public class S3BinaryService implements BinaryService {
     @Override
     public String generateIdentifier() {
         return idService.getSupplier(PREFIX).get();
+    }
+
+    private void bufferUpload(final BinaryMetadata metadata, final InputStream stream, final Path path)
+            throws IOException {
+        // Buffer the file locally so that the PUT request can be parallelized for large objects
+        try {
+            try (final OutputStream output = Files.newOutputStream(path, WRITE)) {
+                IOUtils.copy(stream, output);
+            }
+            final ObjectMetadata md = new ObjectMetadata();
+            metadata.getMimeType().ifPresent(md::setContentType);
+            final PutObjectRequest req = new PutObjectRequest(bucketName, getKey(metadata.getIdentifier()),
+                    path.toFile()).withMetadata(md);
+            client.putObject(req);
+        } finally {
+            Files.delete(path);
+        }
     }
 
     private String computeDigest(final String bucket, final String key, final MessageDigest algorithm) {
