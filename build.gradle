@@ -21,6 +21,7 @@ ext {
     jenaVersion = '3.9.0'
     tamayaVersion = '0.3-incubating'
     trellisVersion = '0.8.0-SNAPSHOT'
+    trellisDbVersion = '0.2.0-SNAPSHOT'
     awsJerseyVersion = '1.2'
     awsVersion = '1.11.450'
 
@@ -222,12 +223,12 @@ subprojects { subproj ->
 
     tasks.withType(PublishToMavenRepository) {
         onlyIf {
-            subproj.name != "trellis-aws-deployment"
+            subproj.name != "trellis-aws-neptune-deployment"
         }
     }
     tasks.withType(PublishToMavenLocal) {
         onlyIf {
-            subproj.name != "trellis-aws-deployment"
+            subproj.name != "trellis-aws-neptune-deployment"
         }
     }
     task install(dependsOn: [assemble, publishToMavenLocal])
@@ -354,7 +355,7 @@ configure(rootProject) {
 		additionalSourceDirs = files(subprojects.sourceSets.main.allSource.srcDirs)
 		sourceDirectories = files(subprojects.sourceSets.main.allSource.srcDirs)
 		classDirectories =  files(subprojects.sourceSets.main.output)
-        executionData = files(subprojects.findAll { it.name != 'trellis-aws-deployment' }.jacocoTestReport.executionData)
+        executionData = files(subprojects.findAll { it.name != 'trellis-aws-neptune-deployment' }.jacocoTestReport.executionData)
 		reports {
 			html.enabled = true
 			xml.enabled = true
