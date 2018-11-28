@@ -59,7 +59,7 @@ public class S3MementoServiceTest {
     @AfterAll
     public static void tearDown() throws Exception {
         final AmazonS3 client = defaultClient();
-        final String bucket = ConfigurationProvider.getConfiguration().get(S3MementoService.TRELLIS_MEMENTO_BUCKET);
+        final String bucket = ConfigurationProvider.getConfiguration().get(S3MementoService.CONFIG_MEMENTO_BUCKET);
         client.listObjects(bucket, "mementos/" + base).getObjectSummaries().stream()
             .map(S3ObjectSummary::getKey).forEach(key -> client.deleteObject(bucket, key));
     }

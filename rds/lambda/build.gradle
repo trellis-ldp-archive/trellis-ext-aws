@@ -4,16 +4,16 @@ apply plugin: 'osgi'
 description = 'Trellis cloud extension'
 
 ext {
-    moduleName = 'org.trellisldp.ext.aws.neptune.lambda'
+    moduleName = 'org.trellisldp.ext.aws.rds.lambda'
 }
 
 dependencies {
     api("org.trellisldp:trellis-api:$trellisVersion")
     api("com.amazonaws:aws-java-sdk-lambda:$awsVersion")
 
+    implementation("org.jdbi:jdbi3-core:$jdbiVersion")
     implementation("com.amazonaws.serverless:aws-serverless-java-container-jersey:$awsJerseyVersion")
     implementation("commons-codec:commons-codec:$commonsCodecVersion")
-    implementation("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
     implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
     implementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
@@ -24,9 +24,16 @@ dependencies {
     implementation("org.trellisldp:trellis-io-jena:$trellisVersion")
     implementation("org.trellisldp:trellis-http:$trellisVersion")
     implementation("org.trellisldp:trellis-rdfa:$trellisVersion")
-    implementation("org.trellisldp:trellis-triplestore:$trellisVersion")
     implementation("org.trellisldp:trellis-vocabulary:$trellisVersion")
+    implementation("org.trellisldp.ext:trellis-db:$trellisDbVersion")
     implementation project(":trellis-aws")
+
+    implementation("mysql:mysql-connector-java:$mysqlVersion")
+    implementation("org.postgresql:postgresql:$postgresVersion")
+
+    runtime("javax.xml.bind:jaxb-api:$jaxbVersion")
+    runtime("javax.activation:activation:$activationVersion")
+    runtime("org.yaml:snakeyaml:$snakeyamlVersion")
 
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("org.glassfish.jersey.inject:jersey-hk2:$jerseyVersion")
@@ -52,9 +59,12 @@ jar {
 }
 
 test {
-    systemProperty 'trellis.neptune.url', "http://example.com"
     systemProperty "trellis.s3.memento.bucket", System.getenv("AWS_TEST_BUCKET") ?: "test.trellisldp.org"
     systemProperty "trellis.s3.binary.bucket", System.getenv("AWS_TEST_BUCKET") ?: "test.trellisldp.org"
     systemProperty "trellis.dynamodb.memento.table", System.getenv("AWS_TEST_TABLE") ?: "trellis-test"
+    systemProperty "trellis.sns.topic", System.getenv("AWS_TEST_TOPIC")
+    systemProperty "trellis.jdbc.url", System.getenv("AWS_RDS_URL") ?: ""
+    systemProperty "trellis.jdbc.username", System.getenv("AWS_RDS_USERNAME")
+    systemProperty "trellis.jdbc.password", System.getenv("AWS_JDBC_PASSWORD")
 }
 

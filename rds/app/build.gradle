@@ -1,57 +1,64 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'osgi'
 
-description = 'Trellis cloud extension'
+description = 'Trellis Cloud Database Application'
 
 ext {
-    moduleName = 'org.trellisldp.ext.aws.neptune.app'
+    moduleName = 'org.trellisldp.ext.aws.rds.app'
 }
 
 dependencies {
     compile("io.dropwizard:dropwizard-auth:$dropwizardVersion")
     compile("io.dropwizard:dropwizard-core:$dropwizardVersion")
     compile("io.dropwizard:dropwizard-http2:$dropwizardVersion")
+    compile("io.dropwizard:dropwizard-jdbi3:$dropwizardVersion")
     compile("io.dropwizard:dropwizard-metrics:$dropwizardVersion")
+    compile("io.dropwizard:dropwizard-migrations:$dropwizardVersion")
     compile("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
     compile("org.apache.tamaya:tamaya-core:$tamayaVersion")
     compile("org.slf4j:slf4j-api:$slf4jVersion")
 
-    compile("commons-codec:commons-codec:$commonsCodecVersion")
-    compile("org.apache.tamaya:tamaya-api:$tamayaVersion")
-    compile("org.apache.tamaya:tamaya-core:$tamayaVersion")
-    compile("org.slf4j:slf4j-api:$slf4jVersion")
-    compile("org.trellisldp:trellis-agent:$trellisVersion")
-    compile("org.trellisldp:trellis-api:$trellisVersion")
-    compile("org.trellisldp:trellis-audit:$trellisVersion")
+    compile("mysql:mysql-connector-java:$mysqlVersion")
+    compile("org.postgresql:postgresql:$postgresVersion")
+
     compile("org.trellisldp:trellis-constraint-rules:$trellisVersion")
-    compile("org.trellisldp:trellis-event-serialization:$trellisVersion")
-    compile("org.trellisldp:trellis-http:$trellisVersion")
     compile("org.trellisldp:trellis-io-jena:$trellisVersion")
-    compile("org.trellisldp:trellis-namespaces:$trellisVersion")
-    compile("org.trellisldp:trellis-triplestore:$trellisVersion")
+    compile("org.trellisldp:trellis-api:$trellisVersion")
+    compile("org.trellisldp:trellis-http:$trellisVersion")
     compile("org.trellisldp:trellis-vocabulary:$trellisVersion")
+    compile("org.trellisldp:trellis-agent:$trellisVersion")
+    compile("org.trellisldp:trellis-audit:$trellisVersion")
+    compile("org.trellisldp:trellis-event-serialization:$trellisVersion")
     compile("org.trellisldp:trellis-webac:$trellisVersion")
     compile("org.trellisldp:trellis-rdfa:$trellisVersion")
     compile("org.trellisldp:trellis-app:$trellisVersion")
+    compile("org.trellisldp.ext:trellis-db:$trellisDbVersion")
 
     compile project(":trellis-aws")
 
     runtime("javax.xml.bind:jaxb-api:$jaxbVersion")
     runtime("javax.activation:activation:$activationVersion")
+    runtime("org.yaml:snakeyaml:$snakeyamlVersion")
 
+    testCompile("com.h2database:h2:$h2Version")
     testCompile("ch.qos.logback:logback-classic:$logbackVersion")
     testCompile("com.google.guava:guava:$guavaVersion")
+    testCompile("com.opentable.components:otj-pg-embedded:$otjPgVersion")
     testCompile("io.dropwizard:dropwizard-client:$dropwizardVersion")
     testCompile("io.dropwizard:dropwizard-testing:$dropwizardVersion")
     testCompile("org.apache.commons:commons-text:$commonsTextVersion")
+    testCompile("org.awaitility:awaitility:$awaitilityVersion")
     testCompile("org.mockito:mockito-core:$mockitoVersion")
     testCompile("org.trellisldp:trellis-test:$trellisVersion")
+}
+
+test {
+	maxParallelForks = Runtime.runtime.availableProcessors() / 2
 }
 
 jar {
     manifest {
         description project.description
-        docURL project.docURL
         vendor project.vendor
         license project.license
 
@@ -65,5 +72,6 @@ test {
     systemProperty "trellis.s3.memento.bucket", System.getenv("AWS_TEST_BUCKET") ?: "test.trellisldp.org"
     systemProperty "trellis.s3.binary.bucket", System.getenv("AWS_TEST_BUCKET") ?: "test.trellisldp.org"
     systemProperty "trellis.dynamodb.memento.table", System.getenv("AWS_TEST_TABLE") ?: "trellis-test"
+    systemProperty "trellis.sns.topic", System.getenv("AWS_TEST_TOPIC")
 }
 

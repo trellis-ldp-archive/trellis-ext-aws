@@ -13,12 +13,15 @@
  */
 package org.trellisldp.ext.aws;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.jena.query.DatasetFactory.create;
 import static org.apache.jena.riot.Lang.NQUADS;
 import static org.trellisldp.api.TrellisUtils.TRELLIS_DATA_PREFIX;
 
-import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,66 +58,77 @@ public class S3Resource implements Resource {
 
     private static final JenaRDF rdf = new JenaRDF();
 
-    private final S3Object res;
+    private final AmazonS3 client;
+    private final ObjectMetadata metadata;
+    private final GetObjectRequest req;
+    private final String prefix;
 
     /**
      * Create a Trellis resource from an S3Object.
-     * @param s3Object the object from S3
+     * @param metadata the object metadata
+     * @param client the s3 client
+     * @param req the GET request
+     * @param prefix the prefix
      */
-    public S3Resource(final S3Object s3Object) {
-        this.res = s3Object;
+    public S3Resource(final ObjectMetadata metadata, final AmazonS3 client, final GetObjectRequest req,
+            final String prefix) {
+        this.metadata = requireNonNull(metadata, "s3 metadata may not be null!");
+        this.client = requireNonNull(client, "s3 client may not be null!");
+        this.req = requireNonNull(req, "s3 request may not be null!");
+        this.prefix = requireNonNull(prefix, "prefix may not be null!");
     }
 
     @Override
     public IRI getIdentifier() {
-        return rdf.createIRI(TRELLIS_DATA_PREFIX + res.getKey().split("\\?version=")[0]);
+        final String key = req.getKey().startsWith(prefix) ? req.getKey().substring(prefix.length()) : req.getKey();
+        return rdf.createIRI(TRELLIS_DATA_PREFIX + key.split("\\?version=")[0]);
     }
 
     @Override
     public Instant getModified() {
-        return ofNullable(getMetadata(MODIFIED)).map(Instant::parse).orElse(null);
+        return ofNullable(metadata.getUserMetaDataOf(MODIFIED)).map(Instant::parse).orElse(null);
     }
 
     @Override
     public IRI getInteractionModel() {
-        return ofNullable(getMetadata(INTERACTION_MODEL)).map(rdf::createIRI).orElse(null);
+        return ofNullable(metadata.getUserMetaDataOf(INTERACTION_MODEL)).map(rdf::createIRI).orElse(null);
     }
 
     @Override
     public Optional<IRI> getContainer() {
-        return ofNullable(getMetadata(CONTAINER)).map(rdf::createIRI);
+        return ofNullable(metadata.getUserMetaDataOf(CONTAINER)).map(rdf::createIRI);
     }
 
     @Override
     public Optional<IRI> getMembershipResource() {
-        return ofNullable(getMetadata(MEMBERSHIP_RESOURCE)).map(rdf::createIRI);
+        return ofNullable(metadata.getUserMetaDataOf(MEMBERSHIP_RESOURCE)).map(rdf::createIRI);
     }
 
     @Override
     public Optional<IRI> getMemberRelation() {
-        return ofNullable(getMetadata(MEMBER_RELATION)).map(rdf::createIRI);
+        return ofNullable(metadata.getUserMetaDataOf(MEMBER_RELATION)).map(rdf::createIRI);
     }
 
     @Override
     public Optional<IRI> getMemberOfRelation() {
-        return ofNullable(getMetadata(MEMBER_OF_RELATION)).map(rdf::createIRI);
+        return ofNullable(metadata.getUserMetaDataOf(MEMBER_OF_RELATION)).map(rdf::createIRI);
     }
 
     @Override
     public Optional<IRI> getInsertedContentRelation() {
-        return ofNullable(getMetadata(INSERTED_CONTENT_RELATION)).map(rdf::createIRI);
+        return ofNullable(metadata.getUserMetaDataOf(INSERTED_CONTENT_RELATION)).map(rdf::createIRI);
     }
 
     @Override
     public Boolean hasAcl() {
-        return ofNullable(getMetadata(HAS_ACL)).isPresent();
+        return ofNullable(metadata.getUserMetaDataOf(HAS_ACL)).isPresent();
     }
 
     @Override
     public Optional<BinaryMetadata> getBinaryMetadata() {
-        final String binaryLocation = getMetadata(BINARY_LOCATION);
-        final String binaryType = getMetadata(BINARY_TYPE);
-        final Long binarySize = ofNullable(getMetadata(BINARY_SIZE)).map(Long::parseLong).orElse(null);
+        final String binaryLocation = metadata.getUserMetaDataOf(BINARY_LOCATION);
+        final String binaryType = metadata.getUserMetaDataOf(BINARY_TYPE);
+        final Long binarySize = ofNullable(metadata.getUserMetaDataOf(BINARY_SIZE)).map(Long::parseLong).orElse(null);
         return ofNullable(binaryLocation).map(rdf::createIRI)
             .map(loc -> BinaryMetadata.builder(loc).mimeType(binaryType).size(binarySize).build());
     }
@@ -122,16 +136,14 @@ public class S3Resource implements Resource {
     @Override
     public Stream<Quad> stream() {
         final Dataset dataset = create();
-        try (final InputStream input = res.getObjectContent()) {
-            RDFParser.source(input).lang(NQUADS).parse(dataset);
-        } catch (final IOException ex) {
-            dataset.close();
-            throw new RuntimeTrellisException("Error parsing input from S3", ex);
+        if (metadata.getInstanceLength() > 0) {
+            try (final InputStream input = client.getObject(req).getObjectContent()) {
+                RDFParser.source(input).lang(NQUADS).parse(dataset);
+            } catch (final IOException ex) {
+                dataset.close();
+                throw new RuntimeTrellisException("Error parsing input from S3", ex);
+            }
         }
         return rdf.asDataset(dataset).stream().map(Quad.class::cast).onClose(dataset::close);
-    }
-
-    private String getMetadata(final String key) {
-        return res.getObjectMetadata().getUserMetaDataOf(key);
     }
 }

@@ -15,11 +15,12 @@ package org.trellisldp.ext.aws;
 
 import static com.amazonaws.services.s3.AmazonS3ClientBuilder.defaultClient;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Base64.getEncoder;
 import static java.util.concurrent.CompletableFuture.allOf;
+import static org.apache.commons.codec.digest.DigestUtils.getDigest;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.trellisldp.api.TrellisUtils.getInstance;
@@ -50,7 +51,7 @@ public class S3BinaryServiceTest {
     @AfterAll
     public static void tearDown() throws Exception {
         final AmazonS3 client = defaultClient();
-        final String bucket = ConfigurationProvider.getConfiguration().get(S3BinaryService.TRELLIS_BINARY_BUCKET);
+        final String bucket = ConfigurationProvider.getConfiguration().get(S3BinaryService.CONFIG_BINARY_BUCKET);
         client.listObjects(bucket, "binaries/" + base).getObjectSummaries().stream()
             .map(S3ObjectSummary::getKey).forEach(key -> client.deleteObject(bucket, key));
     }
@@ -81,11 +82,10 @@ public class S3BinaryServiceTest {
         }).join();
 
         allOf(
-            svc.calculateDigest(identifier, "FOO").thenAccept(digest -> assertNull(digest)),
-            svc.calculateDigest(identifier, "MD5").thenAccept(digest ->
-                assertEquals("ZyNmQT2UvueO5DCvzcaLZw==", digest)),
-            svc.calculateDigest(identifier, "SHA").thenAccept(digest ->
-                assertEquals("o4nMi5wcx3VRpahNOT6Rfh9Pd3c=", digest))).join();
+            svc.calculateDigest(identifier, getDigest("MD5")).thenAccept(digest ->
+                assertEquals("ZyNmQT2UvueO5DCvzcaLZw==", getEncoder().encodeToString(digest))),
+            svc.calculateDigest(identifier, getDigest("SHA-1")).thenAccept(digest ->
+                assertEquals("o4nMi5wcx3VRpahNOT6Rfh9Pd3c=", getEncoder().encodeToString(digest)))).join();
 
         assertDoesNotThrow(svc.purgeContent(identifier)::join);
     }

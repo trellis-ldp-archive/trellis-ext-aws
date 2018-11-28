@@ -16,13 +16,11 @@ package org.trellisldp.ext.aws;
 import static com.amazonaws.services.s3.AmazonS3ClientBuilder.defaultClient;
 import static java.nio.file.StandardOpenOption.WRITE;
 import static java.util.Arrays.asList;
-import static java.util.Base64.getEncoder;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.stream.Collectors.toSet;
-import static org.apache.commons.codec.digest.DigestUtils.getDigest;
 import static org.apache.commons.codec.digest.DigestUtils.updateDigest;
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.MD2;
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.MD5;
@@ -66,8 +64,8 @@ import org.trellisldp.id.UUIDGenerator;
  */
 public class S3BinaryService implements BinaryService {
 
-    public static final String TRELLIS_BINARY_BUCKET = "trellis.s3.binary.bucket";
-    public static final String TRELLIS_BINARY_PATH_PREFIX = "trellis.s3.binary.path.prefix";
+    public static final String CONFIG_BINARY_BUCKET = "trellis.s3.binary.bucket";
+    public static final String CONFIG_BINARY_PATH_PREFIX = "trellis.s3.binary.path.prefix";
 
     private static final Configuration config = getConfiguration();
     private static final String PREFIX = "s3://";
@@ -86,7 +84,7 @@ public class S3BinaryService implements BinaryService {
      * Create an S3-based binary service.
      */
     public S3BinaryService() {
-        this(defaultClient(), config.get(TRELLIS_BINARY_BUCKET), config.get(TRELLIS_BINARY_PATH_PREFIX));
+        this(defaultClient(), config.get(CONFIG_BINARY_BUCKET), config.get(CONFIG_BINARY_PATH_PREFIX));
     }
 
     /**
@@ -123,16 +121,8 @@ public class S3BinaryService implements BinaryService {
     }
 
     @Override
-    public CompletableFuture<String> calculateDigest(final IRI identifier, final String algorithm) {
-        return supplyAsync(() -> {
-            if (SHA.equals(algorithm)) {
-                return computeDigest(bucketName, getKey(identifier), getDigest(SHA_1));
-            } else if (supportedAlgorithms().contains(algorithm)) {
-                return computeDigest(bucketName, getKey(identifier), getDigest(algorithm));
-            }
-            LOGGER.warn("Algorithm not supported: {}", algorithm);
-            return null;
-        });
+    public CompletableFuture<byte[]> calculateDigest(final IRI identifier, final MessageDigest algorithm) {
+        return supplyAsync(() -> computeDigest(bucketName, getKey(identifier), algorithm));
     }
 
     @Override
@@ -162,9 +152,9 @@ public class S3BinaryService implements BinaryService {
         }
     }
 
-    private String computeDigest(final String bucket, final String key, final MessageDigest algorithm) {
+    private byte[] computeDigest(final String bucket, final String key, final MessageDigest algorithm) {
         try (final InputStream input = client.getObject(bucket, key).getObjectContent()) {
-            return getEncoder().encodeToString(updateDigest(algorithm, input).digest());
+            return updateDigest(algorithm, input).digest();
         } catch (final IOException ex) {
             throw new UncheckedIOException("Error computing digest", ex);
         }
