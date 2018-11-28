@@ -26,6 +26,9 @@ dependencies {
     testImplementation("org.apache.commons:commons-text:$commonsTextVersion")
     testImplementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation("org.trellisldp:trellis-event-serialization:$trellisVersion")
+
+    testRuntimeClasspath("ch.qos.logback:logback-classic:$logbackVersion")
 }
 
 jar {
@@ -51,5 +54,6 @@ test {
     systemProperty "trellis.ns-test", "http://example.com/test/"
     systemProperty "trellis.s3.memento.bucket", System.getenv("AWS_TEST_BUCKET") ?: "test.trellisldp.org"
     systemProperty "trellis.s3.binary.bucket", System.getenv("AWS_TEST_BUCKET") ?: "test.trellisldp.org"
+    systemProperty "trellis.sns.topic", System.getenv("AWS_TEST_TOPIC")
 }
 

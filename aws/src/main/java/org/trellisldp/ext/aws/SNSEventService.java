@@ -69,7 +69,5 @@ public class SNSEventService implements EventService {
                 LOGGER.error("Error writing to SNS topic {}: {}", topic, ex.getMessage());
             }
         });
-
     }
-
 }
