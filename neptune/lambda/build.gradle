@@ -1,0 +1,58 @@
+apply plugin: 'java-library'
+apply plugin: 'osgi'
+
+description = 'Trellis cloud extension'
+
+ext {
+    moduleName = 'org.trellisldp.ext.aws.neptune.lambda'
+}
+
+dependencies {
+    api("org.trellisldp:trellis-api:$trellisVersion")
+    api("com.amazonaws:aws-java-sdk-lambda:$awsVersion")
+
+    implementation("com.amazonaws.serverless:aws-serverless-java-container-jersey:$awsJerseyVersion")
+    implementation("commons-codec:commons-codec:$commonsCodecVersion")
+    implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
+    implementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
+    implementation("org.trellisldp:trellis-agent:$trellisVersion")
+    implementation("org.trellisldp:trellis-audit:$trellisVersion")
+    implementation("org.trellisldp:trellis-constraint-rules:$trellisVersion")
+    implementation("org.trellisldp:trellis-event-serialization:$trellisVersion")
+    implementation("org.trellisldp:trellis-io-jena:$trellisVersion")
+    implementation("org.trellisldp:trellis-http:$trellisVersion")
+    implementation("org.trellisldp:trellis-rdfa:$trellisVersion")
+    implementation("org.trellisldp:trellis-triplestore:$trellisVersion")
+    implementation("org.trellisldp:trellis-vocabulary:$trellisVersion")
+    implementation project(":trellis-aws")
+
+    testImplementation("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation("org.glassfish.jersey.inject:jersey-hk2:$jerseyVersion")
+}
+
+jar {
+    manifest {
+        description project.description
+        docURL project.docURL
+        vendor project.vendor
+        license project.license
+
+        instruction 'Automatic-Module-Name', moduleName
+        instruction 'Import-Package', '*'
+        instruction 'Export-Package', "${moduleName};version=${projectOsgiVersion}"
+        instruction 'Require-Capability', '''\
+            osgi.extender; filter:="(osgi.extender=osgi.serviceloader.processor)",
+            osgi.serviceloader;
+                filter:="(osgi.serviceloader=org.apache.commons.rdf.api.RDF)";
+                resolution:=mandatory; cardinality:=at_least_one
+            '''
+    }
+}
+
+test {
+    systemProperty 'trellis.neptune.url', "http://example.com"
+    systemProperty "trellis.s3.memento.bucket", System.getenv("AWS_TEST_BUCKET") ?: "test.trellisldp.org"
+    systemProperty "trellis.s3.binary.bucket", System.getenv("AWS_TEST_BUCKET") ?: "test.trellisldp.org"
+}
+

@@ -1,11 +1,11 @@
 enableFeaturePreview('STABLE_PUBLISHING')
 rootProject.name = 'trellis-ext-aws'
 include ':trellis-aws'
-include ':trellis-aws-lambda'
-include ':trellis-aws-app'
-include ':trellis-aws-deployment'
+include ':trellis-aws-neptune-lambda'
+include ':trellis-aws-neptune-app'
+include ':trellis-aws-neptune-deployment'
 
 project(':trellis-aws').projectDir = "$rootDir/aws" as File
-project(':trellis-aws-lambda').projectDir = "$rootDir/lambda" as File
-project(':trellis-aws-app').projectDir = "$rootDir/app" as File
-project(':trellis-aws-deployment').projectDir = "$rootDir/deployment" as File
+project(':trellis-aws-neptune-lambda').projectDir = "$rootDir/neptune/lambda" as File
+project(':trellis-aws-neptune-app').projectDir = "$rootDir/neptune/app" as File
+project(':trellis-aws-neptune-deployment').projectDir = "$rootDir/neptune/deployment" as File
