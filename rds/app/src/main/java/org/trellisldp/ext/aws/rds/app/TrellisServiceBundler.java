@@ -67,12 +67,12 @@ public class TrellisServiceBundler implements ServiceBundler {
     public TrellisServiceBundler(final AppConfiguration config, final Environment environment) {
         final Jdbi jdbi = new JdbiFactory().build(environment, config.getDataSourceFactory(), "trellis");
 
-        agentService = new SimpleAgentService();
+        auditService = resourceService = new DBResourceService(jdbi);
+        ioService = buildIoService(config, jdbi);
         mementoService = new S3MementoService();
         binaryService = new S3BinaryService();
         eventService = new SNSEventService();
-        auditService = resourceService = new DBResourceService(jdbi);
-        ioService = buildIoService(config, jdbi);
+        agentService = new SimpleAgentService();
     }
 
     @Override
@@ -81,13 +81,13 @@ public class TrellisServiceBundler implements ServiceBundler {
     }
 
     @Override
-    public IOService getIOService() {
-        return ioService;
+    public BinaryService getBinaryService() {
+        return binaryService;
     }
 
     @Override
-    public BinaryService getBinaryService() {
-        return binaryService;
+    public IOService getIOService() {
+        return ioService;
     }
 
     @Override
@@ -96,8 +96,8 @@ public class TrellisServiceBundler implements ServiceBundler {
     }
 
     @Override
-    public AuditService getAuditService() {
-        return auditService;
+    public EventService getEventService() {
+        return eventService;
     }
 
     @Override
@@ -106,8 +106,8 @@ public class TrellisServiceBundler implements ServiceBundler {
     }
 
     @Override
-    public EventService getEventService() {
-        return eventService;
+    public AuditService getAuditService() {
+        return auditService;
     }
 
     private static IOService buildIoService(final AppConfiguration config, final Jdbi jdbi) {

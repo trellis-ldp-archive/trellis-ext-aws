@@ -32,7 +32,6 @@ import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_256;
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_384;
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_512;
 import static org.apache.tamaya.ConfigurationProvider.getConfiguration;
-import static org.slf4j.LoggerFactory.getLogger;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -51,7 +50,6 @@ import java.util.concurrent.CompletableFuture;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.tamaya.Configuration;
-import org.slf4j.Logger;
 import org.trellisldp.api.Binary;
 import org.trellisldp.api.BinaryMetadata;
 import org.trellisldp.api.BinaryService;
@@ -70,7 +68,6 @@ public class S3BinaryService implements BinaryService {
     private static final Configuration config = getConfiguration();
     private static final String PREFIX = "s3://";
     private static final String SHA = "SHA";
-    private static final Logger LOGGER = getLogger(S3BinaryService.class);
     private static final Set<String> algorithms = asList(MD5, MD2, SHA, SHA_1, SHA_256, SHA_384, SHA_512,
             SHA3_256, SHA3_384, SHA3_512).stream()
         .collect(toSet());
