@@ -1,4 +1,4 @@
 #!/bin/sh
 
-systemctl link /opt/trellis/etc/trellis-aws.service
+systemctl link /opt/trellis/etc/trellis-aws-neptune.service
 systemctl daemon-reload

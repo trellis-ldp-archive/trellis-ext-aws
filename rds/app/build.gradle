@@ -71,7 +71,6 @@ jar {
 test {
     systemProperty "trellis.s3.memento.bucket", System.getenv("AWS_TEST_BUCKET") ?: "test.trellisldp.org"
     systemProperty "trellis.s3.binary.bucket", System.getenv("AWS_TEST_BUCKET") ?: "test.trellisldp.org"
-    systemProperty "trellis.dynamodb.memento.table", System.getenv("AWS_TEST_TABLE") ?: "trellis-test"
     systemProperty "trellis.sns.topic", System.getenv("AWS_TEST_TOPIC")
 }
 

@@ -15,7 +15,7 @@ dependencies {
 }
 
 ospackage {
-    packageName = 'trellis-aws'
+    packageName = 'trellis-aws-rds'
     release = '1'
     os = LINUX
     license = 'ASL 2.0'

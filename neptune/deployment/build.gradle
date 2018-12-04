@@ -6,7 +6,7 @@ apply plugin: 'nebula.ospackage-application'
 
 description = 'Trellis AWS Application'
 mainClassName = 'org.trellisldp.ext.aws.neptune.app.TrellisApplication'
-applicationName = 'trellis-aws'
+applicationName = 'trellis-aws-neptune'
 
 dependencies {
     compile project(':trellis-aws-neptune-app')
@@ -15,7 +15,7 @@ dependencies {
 }
 
 ospackage {
-    packageName = 'trellis-aws'
+    packageName = 'trellis-aws-neptune'
     release = '1'
     os = LINUX
     license = 'ASL 2.0'
@@ -64,7 +64,7 @@ buildDeb {
 }
 
 docker {
-    name "trellisldp/trellis-ext-aws:${project.version}"
+    name "trellisldp/trellis-ext-aws-neptune:${project.version}"
     tags 'latest'
     dockerfile file('src/docker/Dockerfile')
     files tasks.distTar.outputs, './src/dist/etc/config.yml','./src/docker/command.sh'

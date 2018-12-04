@@ -80,9 +80,7 @@ public class TrellisMementoEmbeddedPgsqlTest extends AbstractApplicationMementoT
         System.clearProperty(CONFIG_BINARY_PATH_PREFIX);
         APP.after();
         pg.close();
-        if (false) {
-            TestUtils.cleanupS3(getConfiguration().get(CONFIG_MEMENTO_BUCKET), mementos);
-            TestUtils.cleanupS3(getConfiguration().get(CONFIG_BINARY_BUCKET), binaries);
-        }
+        TestUtils.cleanupS3(getConfiguration().get(CONFIG_MEMENTO_BUCKET), mementos);
+        TestUtils.cleanupS3(getConfiguration().get(CONFIG_BINARY_BUCKET), binaries);
     }
 }
