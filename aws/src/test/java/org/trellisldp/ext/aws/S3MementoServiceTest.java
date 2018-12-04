@@ -208,5 +208,4 @@ public class S3MementoServiceTest {
 
         svc.mementos(identifier).thenAccept(mementos -> assertTrue(mementos.contains(time)));
     }
-
 }
