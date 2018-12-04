@@ -25,18 +25,12 @@ import org.apache.jena.rdfconnection.RDFConnection;
 import org.trellisldp.agent.SimpleAgentService;
 import org.trellisldp.api.AgentService;
 import org.trellisldp.api.AuditService;
-import org.trellisldp.api.BinaryService;
-import org.trellisldp.api.EventService;
 import org.trellisldp.api.IOService;
-import org.trellisldp.api.MementoService;
 import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.RDFaWriterService;
 import org.trellisldp.api.ResourceService;
-import org.trellisldp.api.ServiceBundler;
 import org.trellisldp.app.TrellisCache;
-import org.trellisldp.ext.aws.S3BinaryService;
-import org.trellisldp.ext.aws.S3MementoService;
-import org.trellisldp.ext.aws.SNSEventService;
+import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
 import org.trellisldp.io.JenaIOService;
 import org.trellisldp.namespaces.NamespacesJsonContext;
 import org.trellisldp.rdfa.HtmlSerializer;
@@ -49,15 +43,12 @@ import org.trellisldp.triplestore.TriplestoreResourceService;
  * It combines a Triplestore-based resource service along with file-based binary and
  * memento storage. RDF processing is handled with Apache Jena.
  */
-public class TrellisServiceBundler implements ServiceBundler {
+public class TrellisServiceBundler extends AbstractAWSServiceBundler {
 
-    private final MementoService mementoService;
     private final AuditService auditService;
     private final TriplestoreResourceService resourceService;
-    private final BinaryService binaryService;
     private final AgentService agentService;
     private final IOService ioService;
-    private final EventService eventService;
 
     /**
      * Create a new application service bundler.
@@ -65,10 +56,8 @@ public class TrellisServiceBundler implements ServiceBundler {
      * @param environment the dropwizard environment
      */
     public TrellisServiceBundler(final AppConfiguration config, final Environment environment) {
+        super();
         agentService = new SimpleAgentService();
-        eventService = new SNSEventService();
-        binaryService = new S3BinaryService();
-        mementoService = new S3MementoService();
         ioService = buildIoService(config);
         auditService = resourceService = buildResourceService(config, environment);
     }
@@ -76,21 +65,6 @@ public class TrellisServiceBundler implements ServiceBundler {
     @Override
     public ResourceService getResourceService() {
         return resourceService;
-    }
-
-    @Override
-    public IOService getIOService() {
-        return ioService;
-    }
-
-    @Override
-    public BinaryService getBinaryService() {
-        return binaryService;
-    }
-
-    @Override
-    public MementoService getMementoService() {
-        return mementoService;
     }
 
     @Override
@@ -104,8 +78,8 @@ public class TrellisServiceBundler implements ServiceBundler {
     }
 
     @Override
-    public EventService getEventService() {
-        return eventService;
+    public IOService getIOService() {
+        return ioService;
     }
 
     private static TriplestoreResourceService buildResourceService(final AppConfiguration config,

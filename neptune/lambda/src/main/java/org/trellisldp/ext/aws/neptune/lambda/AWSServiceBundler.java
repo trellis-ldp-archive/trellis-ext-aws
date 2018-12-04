@@ -20,16 +20,10 @@ import org.apache.jena.rdfconnection.RDFConnection;
 import org.trellisldp.agent.SimpleAgentService;
 import org.trellisldp.api.AgentService;
 import org.trellisldp.api.AuditService;
-import org.trellisldp.api.BinaryService;
-import org.trellisldp.api.EventService;
 import org.trellisldp.api.IOService;
-import org.trellisldp.api.MementoService;
 import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.ResourceService;
-import org.trellisldp.api.ServiceBundler;
-import org.trellisldp.ext.aws.S3BinaryService;
-import org.trellisldp.ext.aws.S3MementoService;
-import org.trellisldp.ext.aws.SNSEventService;
+import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
 import org.trellisldp.ext.aws.SimpleNamespaceService;
 import org.trellisldp.io.JenaIOService;
 import org.trellisldp.rdfa.HtmlSerializer;
@@ -38,30 +32,25 @@ import org.trellisldp.triplestore.TriplestoreResourceService;
 /**
  * An AWS-Based service bundler.
  */
-public class AWSServiceBundler implements ServiceBundler {
+public class AWSServiceBundler extends AbstractAWSServiceBundler {
 
     /** The configuration key for the Neptune URL. **/
     public static final String TRELLIS_NEPTUNE_URL = "trellis.neptune.url";
 
     private AgentService agentService;
     private AuditService auditService;
-    private BinaryService binaryService;
-    private EventService eventService;
     private IOService ioService;
-    private MementoService mementoService;
     private TriplestoreResourceService resourceService;
 
     /**
      * Get an AWS-based service bundler using Newton.
      */
     public AWSServiceBundler() {
+        super();
         final RDFConnection rdfConnection = connect(getConfiguration().get(TRELLIS_NEPTUNE_URL));
         final NamespaceService nsService = new SimpleNamespaceService();
 
         agentService = new SimpleAgentService();
-        eventService = new SNSEventService();
-        binaryService = new S3BinaryService();
-        mementoService = new S3MementoService();
         ioService = new JenaIOService(nsService, new HtmlSerializer(nsService));
         auditService = resourceService = new TriplestoreResourceService(rdfConnection);
     }
@@ -84,20 +73,5 @@ public class AWSServiceBundler implements ServiceBundler {
     @Override
     public IOService getIOService() {
         return ioService;
-    }
-
-    @Override
-    public MementoService getMementoService() {
-        return mementoService;
-    }
-
-    @Override
-    public BinaryService getBinaryService() {
-        return binaryService;
-    }
-
-    @Override
-    public EventService getEventService() {
-        return eventService;
     }
 }

@@ -15,6 +15,7 @@ package org.trellisldp.ext.aws;
 
 import static com.amazonaws.services.s3.AmazonS3ClientBuilder.defaultClient;
 import static java.time.Instant.now;
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.function.Predicate.isEqual;
@@ -24,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.trellisldp.api.Resource.SpecialResources.MISSING_RESOURCE;
 import static org.trellisldp.api.TrellisUtils.TRELLIS_DATA_PREFIX;
 import static org.trellisldp.api.TrellisUtils.getInstance;
 
@@ -98,7 +100,31 @@ public class S3MementoServiceTest {
             assertTrue(r.hasAcl());
         }).join();
 
-        svc.mementos(identifier).thenAccept(mementos -> assertTrue(mementos.contains(time)));
+        final Resource res2 = mock(Resource.class);
+        final Instant time2 = time.plusSeconds(10L);
+        final Quad quad2 = rdf.createQuad(Trellis.PreferUserManaged, identifier, DC.title,
+                rdf.createLiteral("Better Title"));
+        when(res2.getModified()).thenReturn(time2);
+        when(res2.getIdentifier()).thenReturn(identifier);
+        when(res2.getContainer()).thenReturn(of(root));
+        when(res2.getInteractionModel()).thenReturn(LDP.RDFSource);
+        when(res2.getBinaryMetadata()).thenReturn(empty());
+        when(res2.getMembershipResource()).thenReturn(empty());
+        when(res2.getMemberRelation()).thenReturn(empty());
+        when(res2.getMemberOfRelation()).thenReturn(empty());
+        when(res2.getInsertedContentRelation()).thenReturn(empty());
+        when(res2.stream()).thenAnswer(inv -> Stream.of(quad2, acl));
+        assertDoesNotThrow(svc.put(res2)::join);
+
+        svc.mementos(identifier).thenAccept(mementos -> {
+            assertTrue(mementos.contains(time.truncatedTo(SECONDS)));
+            assertTrue(mementos.contains(time2.truncatedTo(SECONDS)));
+        });
+
+        svc.get(identifier, time.plusSeconds(5L)).thenAccept(r ->
+                assertEquals(time, r.getModified()));
+        svc.get(identifier, time2.plusSeconds(5L)).thenAccept(r ->
+                assertEquals(time2, r.getModified()));
     }
 
     @Test
@@ -142,6 +168,7 @@ public class S3MementoServiceTest {
         }).join();
 
         svc.mementos(identifier).thenAccept(mementos -> assertTrue(mementos.contains(time)));
+        svc.get(identifier, time.minusSeconds(10L)).thenAccept(r -> assertEquals(MISSING_RESOURCE, r));
     }
 
     @Test

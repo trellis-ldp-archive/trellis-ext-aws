@@ -25,18 +25,12 @@ import org.jdbi.v3.core.Jdbi;
 import org.trellisldp.agent.SimpleAgentService;
 import org.trellisldp.api.AgentService;
 import org.trellisldp.api.AuditService;
-import org.trellisldp.api.BinaryService;
-import org.trellisldp.api.EventService;
 import org.trellisldp.api.IOService;
-import org.trellisldp.api.MementoService;
 import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.RDFaWriterService;
 import org.trellisldp.api.ResourceService;
-import org.trellisldp.api.ServiceBundler;
 import org.trellisldp.app.TrellisCache;
-import org.trellisldp.ext.aws.S3BinaryService;
-import org.trellisldp.ext.aws.S3MementoService;
-import org.trellisldp.ext.aws.SNSEventService;
+import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
 import org.trellisldp.ext.db.DBNamespaceService;
 import org.trellisldp.ext.db.DBResourceService;
 import org.trellisldp.io.JenaIOService;
@@ -49,15 +43,12 @@ import org.trellisldp.rdfa.HtmlSerializer;
  * It combines an RDBMS-based resource service along with S3-based binary and
  * memento storage. RDF processing is handled with Apache Jena.
  */
-public class TrellisServiceBundler implements ServiceBundler {
+public class TrellisServiceBundler extends AbstractAWSServiceBundler {
 
-    private final MementoService mementoService;
-    private final AuditService auditService;
-    private final DBResourceService resourceService;
-    private final BinaryService binaryService;
-    private final AgentService agentService;
-    private final IOService ioService;
-    private final EventService eventService;
+    private DBResourceService resourceService;
+    private AuditService auditService;
+    private IOService ioService;
+    private AgentService agentService;
 
     /**
      * Create a new application service bundler.
@@ -65,13 +56,11 @@ public class TrellisServiceBundler implements ServiceBundler {
      * @param environment the dropwizard environment
      */
     public TrellisServiceBundler(final AppConfiguration config, final Environment environment) {
+        super();
         final Jdbi jdbi = new JdbiFactory().build(environment, config.getDataSourceFactory(), "trellis");
 
         auditService = resourceService = new DBResourceService(jdbi);
         ioService = buildIoService(config, jdbi);
-        mementoService = new S3MementoService();
-        binaryService = new S3BinaryService();
-        eventService = new SNSEventService();
         agentService = new SimpleAgentService();
     }
 
@@ -81,23 +70,8 @@ public class TrellisServiceBundler implements ServiceBundler {
     }
 
     @Override
-    public BinaryService getBinaryService() {
-        return binaryService;
-    }
-
-    @Override
     public IOService getIOService() {
         return ioService;
-    }
-
-    @Override
-    public MementoService getMementoService() {
-        return mementoService;
-    }
-
-    @Override
-    public EventService getEventService() {
-        return eventService;
     }
 
     @Override
