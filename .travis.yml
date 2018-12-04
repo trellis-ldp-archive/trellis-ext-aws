@@ -11,6 +11,9 @@ stages:
   - test
   - deploy
 
+before_script:
+  - psql -c 'create database trellis;' -U postgres
+
 env:
     - JOB=check
 
