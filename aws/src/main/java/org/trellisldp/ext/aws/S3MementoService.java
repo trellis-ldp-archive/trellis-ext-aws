@@ -17,6 +17,7 @@ import static com.amazonaws.services.s3.AmazonS3ClientBuilder.defaultClient;
 import static java.io.File.createTempFile;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.singletonMap;
+import static java.util.Collections.unmodifiableSortedSet;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
@@ -28,13 +29,13 @@ import static org.slf4j.LoggerFactory.getLogger;
 import static org.trellisldp.api.Resource.SpecialResources.MISSING_RESOURCE;
 import static org.trellisldp.api.TrellisUtils.TRELLIS_DATA_PREFIX;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ListObjectsV2Request;
+import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -70,39 +71,30 @@ public class S3MementoService implements MementoService {
     public static final Logger LOGGER = getLogger(S3MementoService.class);
     public static final String CONFIG_MEMENTO_BUCKET = "trellis.s3.memento.bucket";
     public static final String CONFIG_MEMENTO_PATH_PREFIX = "trellis.s3.memento.path.prefix";
-    public static final String CONFIG_MEMENTO_TABLE = "trellis.dynamodb.memento.table";
 
     private static final JenaRDF rdf = new JenaRDF();
     private static final Configuration config = getConfiguration();
 
     private final AmazonS3 client;
-    private final AmazonDynamoDB dynamo;
     private final String bucketName;
     private final String pathPrefix;
-    private final String tableName;
 
     /**
      * Create an S3-based memento service.
      */
     public S3MementoService() {
-        this(defaultClient(), AmazonDynamoDBClientBuilder.defaultClient(), config.get(CONFIG_MEMENTO_TABLE),
-                config.get(CONFIG_MEMENTO_BUCKET), config.get(CONFIG_MEMENTO_PATH_PREFIX));
+        this(defaultClient(), config.get(CONFIG_MEMENTO_BUCKET), config.get(CONFIG_MEMENTO_PATH_PREFIX));
     }
 
     /**
      * Create an S3-based memento service.
      * @param s3Client the S3 client
-     * @param dynamoClient the dynamo client
-     * @param tableName the table name
      * @param bucketName the bucket name
      * @param pathPrefix the path prefix for mementos, may be {@code null}
      */
-    public S3MementoService(final AmazonS3 s3Client, final AmazonDynamoDB dynamoClient, final String tableName,
-            final String bucketName, final String pathPrefix) {
+    public S3MementoService(final AmazonS3 s3Client, final String bucketName, final String pathPrefix) {
         this.client = requireNonNull(s3Client, "S3 client may not be null!");
-        this.dynamo = requireNonNull(dynamoClient, "Dynamo client may not be null!");
         this.bucketName = requireNonNull(bucketName, "AWS Bucket may not be null!");
-        this.tableName = requireNonNull(tableName, "AWS Dynamo table may not be null!");
         this.pathPrefix = ofNullable(pathPrefix).orElse("");
     }
 
@@ -181,13 +173,16 @@ public class S3MementoService implements MementoService {
 
     private SortedSet<Instant> listMementos(final IRI identifier) {
         final SortedSet<Instant> versions = new TreeSet<>();
-        final Map<String, AttributeValue> key = singletonMap("ResourceId", new AttributeValue(getKey(identifier)));
-
-        ofNullable(dynamo.getItem(tableName, key).getItem())
-            .map(res -> res.get("Mementos")).map(AttributeValue::getL).orElseGet(Collections::emptyList).stream()
-            .map(AttributeValue::getN).map(Long::parseLong).map(Instant::ofEpochSecond).forEach(versions::add);
-
-        return versions;
+        final ListObjectsV2Request req = new ListObjectsV2Request().withBucketName(bucketName)
+            .withPrefix(getKey(identifier)).withDelimiter("/");
+        ListObjectsV2Result result;
+        do {
+            result = client.listObjectsV2(req);
+            result.getObjectSummaries().stream().map(S3ObjectSummary::getKey).map(this::getInstant)
+                .map(i -> i.truncatedTo(SECONDS)).forEachOrdered(versions::add);
+            req.setContinuationToken(result.getContinuationToken());
+        } while (result.isTruncated());
+        return unmodifiableSortedSet(versions);
     }
 
     private Instant getInstant(final String key) {
@@ -196,11 +191,11 @@ public class S3MementoService implements MementoService {
     }
 
     private String getKey(final IRI identifier) {
-        return pathPrefix + identifier.getIRIString().substring(TRELLIS_DATA_PREFIX.length());
+        return pathPrefix + identifier.getIRIString().substring(TRELLIS_DATA_PREFIX.length()) + "?version=";
     }
 
     private String getKey(final IRI identifier, final Instant time) {
-        return getKey(identifier) + "?version=" + Long.toString(time.truncatedTo(SECONDS).getEpochSecond());
+        return getKey(identifier) + Long.toString(time.truncatedTo(SECONDS).getEpochSecond());
     }
 
     private static File getTempFile() {

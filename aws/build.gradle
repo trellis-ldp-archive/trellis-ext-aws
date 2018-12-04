@@ -10,7 +10,6 @@ ext {
 dependencies {
     api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
     api("org.trellisldp:trellis-api:$trellisVersion")
-    api("com.amazonaws:aws-java-sdk-dynamodb:$awsVersion")
     api("com.amazonaws:aws-java-sdk-s3:$awsVersion")
     api("com.amazonaws:aws-java-sdk-sns:$awsVersion")
 
