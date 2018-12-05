@@ -36,16 +36,16 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 @EnabledIfEnvironmentVariable(named = "TRAVIS", matches = "true")
 public class TrellisAuditPgsqlTest extends AbstractAuditTests {
 
-    private static final DropwizardTestSupport<AppConfiguration> PG_APP = TestUtils.buildPgsqlApp(
-            "jdbc:postgresql://localhost/trellis", "postgres", "");
-
-    private static final Client CLIENT = TestUtils.buildClient(PG_APP);
     private static final String mementos = TestUtils.randomString(10) + "/";
     private static final String binaries = TestUtils.randomString(10) + "/";
+    private static DropwizardTestSupport<AppConfiguration> PG_APP;
+    private static Client CLIENT;
 
     static {
         System.setProperty(CONFIG_MEMENTO_PATH_PREFIX, mementos);
         System.setProperty(CONFIG_BINARY_PATH_PREFIX, binaries);
+        PG_APP = TestUtils.buildPgsqlApp("jdbc:postgresql://localhost/trellis", "postgres", "");
+        CLIENT = TestUtils.buildClient(PG_APP);
         try {
             PG_APP.getApplication().run("db", "migrate", resourceFilePath("trellis-config.yml"));
         } catch (final Exception ex) {

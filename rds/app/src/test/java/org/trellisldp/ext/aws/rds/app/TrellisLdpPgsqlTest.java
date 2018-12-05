@@ -15,6 +15,7 @@ package org.trellisldp.ext.aws.rds.app;
 
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 import static org.apache.tamaya.ConfigurationProvider.getConfiguration;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.trellisldp.ext.aws.S3BinaryService.CONFIG_BINARY_BUCKET;
 import static org.trellisldp.ext.aws.S3BinaryService.CONFIG_BINARY_PATH_PREFIX;
 import static org.trellisldp.ext.aws.S3MementoService.CONFIG_MEMENTO_BUCKET;
@@ -27,7 +28,6 @@ import java.io.IOException;
 import javax.ws.rs.client.Client;
 
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 /**
@@ -38,15 +38,19 @@ public class TrellisLdpPgsqlTest extends AbstractLdpTests {
 
     private static final String mementos = TestUtils.randomString(10) + "/";
     private static final String binaries = TestUtils.randomString(10) + "/";
-    private static final DropwizardTestSupport<AppConfiguration> PG_APP = TestUtils.buildPgsqlApp(
-            "jdbc:postgresql://localhost/trellis", "postgres", "");
-    private static final Client CLIENT = TestUtils.buildClient(PG_APP);
+    private static DropwizardTestSupport<AppConfiguration> PG_APP;
+    private static Client CLIENT;
 
-    @BeforeAll
-    public static void setup() throws Exception {
+    static {
         System.setProperty(CONFIG_MEMENTO_PATH_PREFIX, mementos);
         System.setProperty(CONFIG_BINARY_PATH_PREFIX, binaries);
-        PG_APP.getApplication().run("db", "migrate", resourceFilePath("trellis-config.yml"));
+        PG_APP = TestUtils.buildPgsqlApp("jdbc:postgresql://localhost/trellis", "postgres", "");
+        try {
+            PG_APP.getApplication().run("db", "migrate", resourceFilePath("trellis-config.yml"));
+        } catch (final Exception ex) {
+            fail(ex.getMessage(), ex);
+        }
+        CLIENT = TestUtils.buildClient(PG_APP);
     }
 
     @Override
