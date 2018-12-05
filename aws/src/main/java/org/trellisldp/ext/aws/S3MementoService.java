@@ -18,10 +18,10 @@ import static java.io.File.createTempFile;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.unmodifiableSortedSet;
 import static java.util.Objects.requireNonNull;
-import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
+import static java.util.stream.Stream.of;
 import static org.apache.jena.riot.Lang.NQUADS;
 import static org.apache.tamaya.ConfigurationProvider.getConfiguration;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -51,7 +51,6 @@ import java.util.stream.Stream;
 
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.Quad;
-import org.apache.commons.rdf.jena.JenaDataset;
 import org.apache.commons.rdf.jena.JenaRDF;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.tamaya.Configuration;
@@ -59,7 +58,6 @@ import org.slf4j.Logger;
 import org.trellisldp.api.MementoService;
 import org.trellisldp.api.Resource;
 import org.trellisldp.api.RuntimeTrellisException;
-import org.trellisldp.vocabulary.Trellis;
 
 /**
  * An S3-based Memento service.
@@ -99,45 +97,43 @@ public class S3MementoService implements MementoService {
     @Override
     public CompletableFuture<Void> put(final Resource resource) {
         return runAsync(() -> {
-            final File file = getTempFile();
-            file.deleteOnExit();
-            final Map<String, String> metadata = new HashMap<>();
-            metadata.put(S3Resource.INTERACTION_MODEL, resource.getInteractionModel().getIRIString());
-            metadata.put(S3Resource.MODIFIED, resource.getModified().toString());
-            resource.getContainer().map(IRI::getIRIString).ifPresent(c -> metadata.put(S3Resource.CONTAINER, c));
-            resource.getBinaryMetadata().ifPresent(b -> {
-                metadata.put(S3Resource.BINARY_LOCATION, b.getIdentifier().getIRIString());
-                b.getMimeType().ifPresent(m -> metadata.put(S3Resource.BINARY_TYPE, m));
-                b.getSize().ifPresent(s -> metadata.put(S3Resource.BINARY_SIZE, Long.toString(s)));
-            });
-            resource.getMembershipResource().map(IRI::getIRIString)
-                .ifPresent(m -> metadata.put(S3Resource.MEMBERSHIP_RESOURCE, m));
-            resource.getMemberRelation().map(IRI::getIRIString)
-                .ifPresent(m -> metadata.put(S3Resource.MEMBER_RELATION, m));
-            resource.getMemberOfRelation().map(IRI::getIRIString)
-                .ifPresent(m -> metadata.put(S3Resource.MEMBER_OF_RELATION, m));
-            resource.getInsertedContentRelation().map(IRI::getIRIString)
-                .ifPresent(m -> metadata.put(S3Resource.INSERTED_CONTENT_RELATION, m));
-
-            try (final JenaDataset dataset = rdf.createDataset();
-                    final OutputStream output = new FileOutputStream(file);
-                    final Stream<? extends Quad> quads = resource.stream()) {
-                quads.forEachOrdered(dataset::add);
-
-                if (dataset.contains(of(Trellis.PreferAccessControl), null, null, null)) {
-                    metadata.put(S3Resource.HAS_ACL, "true");
-                }
-                RDFDataMgr.write(output, dataset.asJenaDatasetGraph(), NQUADS);
-            } catch (final Exception ex) {
-                throw new RuntimeTrellisException("Error closing dataset", ex);
-            }
-            final ObjectMetadata md = new ObjectMetadata();
-            md.setContentType("application/n-quads");
-            md.setUserMetadata(metadata);
-            final PutObjectRequest req = new PutObjectRequest(bucketName, getKey(resource.getIdentifier(),
-                        resource.getModified().truncatedTo(SECONDS)), file);
-            client.putObject(req.withMetadata(md));
             try {
+                final File file = createTempFile("trellis-memento-", ".nq");
+                file.deleteOnExit();
+                final Map<String, String> metadata = new HashMap<>();
+                metadata.put(S3Resource.INTERACTION_MODEL, resource.getInteractionModel().getIRIString());
+                metadata.put(S3Resource.MODIFIED, resource.getModified().toString());
+                resource.getContainer().map(IRI::getIRIString).ifPresent(c -> metadata.put(S3Resource.CONTAINER, c));
+                resource.getBinaryMetadata().ifPresent(b -> {
+                    metadata.put(S3Resource.BINARY_LOCATION, b.getIdentifier().getIRIString());
+                    b.getMimeType().ifPresent(m -> metadata.put(S3Resource.BINARY_TYPE, m));
+                    b.getSize().ifPresent(s -> metadata.put(S3Resource.BINARY_SIZE, Long.toString(s)));
+                });
+                resource.getMembershipResource().map(IRI::getIRIString)
+                    .ifPresent(m -> metadata.put(S3Resource.MEMBERSHIP_RESOURCE, m));
+                resource.getMemberRelation().map(IRI::getIRIString)
+                    .ifPresent(m -> metadata.put(S3Resource.MEMBER_RELATION, m));
+                resource.getMemberOfRelation().map(IRI::getIRIString)
+                    .ifPresent(m -> metadata.put(S3Resource.MEMBER_OF_RELATION, m));
+                resource.getInsertedContentRelation().map(IRI::getIRIString)
+                    .ifPresent(m -> metadata.put(S3Resource.INSERTED_CONTENT_RELATION, m));
+
+                try (final CloseableJenaDataset dataset = new CloseableJenaDataset(rdf.createDataset());
+                        final OutputStream output = new FileOutputStream(file);
+                        final Stream<? extends Quad> quads = resource.stream()) {
+                    quads.forEachOrdered(dataset::add);
+
+                    if (dataset.hasAcl()) {
+                        metadata.put(S3Resource.HAS_ACL, "true");
+                    }
+                    RDFDataMgr.write(output, dataset.asJenaDatasetGraph(), NQUADS);
+                }
+                final ObjectMetadata md = new ObjectMetadata();
+                md.setContentType("application/n-quads");
+                md.setUserMetadata(metadata);
+                final PutObjectRequest req = new PutObjectRequest(bucketName, getKey(resource.getIdentifier(),
+                            resource.getModified().truncatedTo(SECONDS)), file);
+                client.putObject(req.withMetadata(md));
                 Files.delete(file.toPath());
             } catch (final IOException ex) {
                 throw new RuntimeTrellisException("Error deleting locally buffered file", ex);
@@ -176,16 +172,16 @@ public class S3MementoService implements MementoService {
         ListObjectsV2Result result;
         do {
             result = client.listObjectsV2(req);
-            result.getObjectSummaries().stream().map(S3ObjectSummary::getKey).map(this::getInstant)
+            result.getObjectSummaries().stream().map(S3ObjectSummary::getKey).flatMap(this::getInstant)
                 .map(i -> i.truncatedTo(SECONDS)).forEachOrdered(versions::add);
             req.setContinuationToken(result.getContinuationToken());
         } while (result.isTruncated());
         return unmodifiableSortedSet(versions);
     }
 
-    private Instant getInstant(final String key) {
+    private Stream<Instant> getInstant(final String key) {
         return of(key).map(k -> k.split("\\?version=", 2)).filter(p -> p.length == 2).map(p -> p[1])
-            .map(Long::parseLong).map(Instant::ofEpochSecond).map(i -> i.truncatedTo(SECONDS)).orElse(null);
+            .map(Long::parseLong).map(Instant::ofEpochSecond).map(i -> i.truncatedTo(SECONDS));
     }
 
     private String getKey(final IRI identifier) {
@@ -194,13 +190,5 @@ public class S3MementoService implements MementoService {
 
     private String getKey(final IRI identifier, final Instant time) {
         return getKey(identifier) + Long.toString(time.truncatedTo(SECONDS).getEpochSecond());
-    }
-
-    private static File getTempFile() {
-        try {
-            return createTempFile("trellis-memento-", ".nq");
-        } catch (final IOException ex) {
-            throw new RuntimeTrellisException("Error creating temporary file", ex);
-        }
     }
 }

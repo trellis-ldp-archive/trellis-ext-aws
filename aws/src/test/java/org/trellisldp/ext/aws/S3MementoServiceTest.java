@@ -16,13 +16,17 @@ package org.trellisldp.ext.aws;
 import static com.amazonaws.services.s3.AmazonS3ClientBuilder.defaultClient;
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.SECONDS;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.function.Predicate.isEqual;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.trellisldp.api.Resource.SpecialResources.MISSING_RESOURCE;
@@ -30,9 +34,14 @@ import static org.trellisldp.api.TrellisUtils.TRELLIS_DATA_PREFIX;
 import static org.trellisldp.api.TrellisUtils.getInstance;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ListObjectsV2Request;
+import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
+import java.io.IOException;
 import java.time.Instant;
+import java.util.SortedSet;
+import java.util.concurrent.CompletionException;
 import java.util.stream.Stream;
 
 import org.apache.commons.rdf.api.IRI;
@@ -207,5 +216,37 @@ public class S3MementoServiceTest {
         }).join();
 
         svc.mementos(identifier).thenAccept(mementos -> assertTrue(mementos.contains(time)));
+    }
+
+    @Test
+    public void testMementoError() {
+        final Resource res = mock(Resource.class);
+        when(res.getInteractionModel()).thenAnswer(inv -> {
+            throw new IOException("Expected");
+        });
+
+        final MementoService svc = new S3MementoService();
+        assertThrows(CompletionException.class, svc.put(res)::join);
+    }
+
+    @Test
+    public void testTruncated() {
+        final AmazonS3 mockClient = mock(AmazonS3.class);
+        final ListObjectsV2Result mockResult = mock(ListObjectsV2Result.class);
+        final S3ObjectSummary obj1 = new S3ObjectSummary();
+        obj1.setKey("object/key?version=1544042743");
+        final S3ObjectSummary obj2 = new S3ObjectSummary();
+        obj2.setKey("object/key?version=1544042912");
+        final S3ObjectSummary obj3 = new S3ObjectSummary();
+        obj3.setKey("object/key?version");
+
+        when(mockClient.listObjectsV2(any(ListObjectsV2Request.class))).thenReturn(mockResult);
+        when(mockResult.getObjectSummaries()).thenReturn(singletonList(obj1)).thenReturn(asList(obj2, obj3));
+        when(mockResult.getContinuationToken()).thenReturn("continuation");
+        when(mockResult.isTruncated()).thenReturn(true).thenReturn(false);
+        final IRI identifier = rdf.createIRI(TRELLIS_DATA_PREFIX + "mementos/" + base + "/container");
+        final MementoService svc = new S3MementoService(mockClient, "bucket", null);
+        final SortedSet<Instant> m = svc.mementos(identifier).join();
+        assertEquals(2L, m.size());
     }
 }
