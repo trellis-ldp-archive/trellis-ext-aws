@@ -21,8 +21,10 @@ import static org.apache.commons.codec.digest.DigestUtils.getDigest;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
 import static org.trellisldp.api.TrellisUtils.getInstance;
 
 import com.amazonaws.services.s3.AmazonS3;
@@ -30,6 +32,7 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.CompletionException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.rdf.api.IRI;
@@ -113,5 +116,16 @@ public class S3BinaryServiceTest {
         assertTrue(svc.supportedAlgorithms().contains("SHA"));
         assertTrue(svc.supportedAlgorithms().contains("SHA-1"));
         assertTrue(svc.supportedAlgorithms().contains("SHA-256"));
+    }
+
+    @Test
+    public void testErrors() {
+        final InputStream throwingMockInputStream = mock(InputStream.class, inv -> {
+                throw new IOException("Expected error");
+        });
+        final BinaryService svc = new S3BinaryService();
+        final IRI identifier = rdf.createIRI(svc.generateIdentifier());
+        assertThrows(CompletionException.class,
+                svc.setContent(BinaryMetadata.builder(identifier).build(), throwingMockInputStream)::join);
     }
 }
