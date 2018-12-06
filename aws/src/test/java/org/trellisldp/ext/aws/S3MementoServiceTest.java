@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.trellisldp.api.Resource.SpecialResources.MISSING_RESOURCE;
@@ -34,8 +35,11 @@ import static org.trellisldp.api.TrellisUtils.TRELLIS_DATA_PREFIX;
 import static org.trellisldp.api.TrellisUtils.getInstance;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import java.io.IOException;
@@ -54,6 +58,7 @@ import org.junit.jupiter.api.Test;
 import org.trellisldp.api.BinaryMetadata;
 import org.trellisldp.api.MementoService;
 import org.trellisldp.api.Resource;
+import org.trellisldp.api.RuntimeTrellisException;
 import org.trellisldp.vocabulary.ACL;
 import org.trellisldp.vocabulary.DC;
 import org.trellisldp.vocabulary.LDP;
@@ -248,5 +253,21 @@ public class S3MementoServiceTest {
         final MementoService svc = new S3MementoService(mockClient, "bucket", null);
         final SortedSet<Instant> m = svc.mementos(identifier).join();
         assertEquals(2L, m.size());
+    }
+
+    @Test
+    public void testResourceError() {
+        final AmazonS3 mockClient = mock(AmazonS3.class);
+        final ObjectMetadata mockMetadata = mock(ObjectMetadata.class);
+        final GetObjectRequest mockRequest = mock(GetObjectRequest.class);
+        final S3Object mockObject = mock(S3Object.class);
+
+        when(mockClient.getObject(eq(mockRequest))).thenReturn(mockObject);
+        when(mockObject.getObjectContent()).thenAnswer(inv -> {
+            throw new IOException("Expected");
+        });
+
+        final Resource testResource = new S3Resource(mockMetadata, mockClient, mockRequest, "");
+        assertThrows(RuntimeTrellisException.class, testResource::stream);
     }
 }

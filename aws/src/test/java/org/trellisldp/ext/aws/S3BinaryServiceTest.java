@@ -24,14 +24,19 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.trellisldp.api.TrellisUtils.getInstance;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.MessageDigest;
 import java.util.concurrent.CompletionException;
 
 import org.apache.commons.io.IOUtils;
@@ -127,5 +132,22 @@ public class S3BinaryServiceTest {
         final IRI identifier = rdf.createIRI(svc.generateIdentifier());
         assertThrows(CompletionException.class,
                 svc.setContent(BinaryMetadata.builder(identifier).build(), throwingMockInputStream)::join);
+    }
+
+    @Test
+    public void testDigestError() throws Exception {
+        final AmazonS3 mockClient = mock(AmazonS3.class);
+        final S3Object mockObject = mock(S3Object.class);
+
+        when(mockClient.getObject(eq("bucket"), any())).thenReturn(mockObject);
+        when(mockObject.getObjectContent()).thenAnswer(inv -> {
+            throw new IOException("Expected");
+        });
+
+        final BinaryService svc = new S3BinaryService(mockClient, "bucket", "");
+        final IRI identifier = rdf.createIRI(svc.generateIdentifier());
+
+        assertThrows(CompletionException.class,
+                svc.calculateDigest(identifier, MessageDigest.getInstance("MD5"))::join);
     }
 }
