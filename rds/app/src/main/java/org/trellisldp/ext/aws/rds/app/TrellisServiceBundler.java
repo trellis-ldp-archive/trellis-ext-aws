@@ -26,6 +26,7 @@ import org.trellisldp.agent.SimpleAgentService;
 import org.trellisldp.api.AgentService;
 import org.trellisldp.api.AuditService;
 import org.trellisldp.api.IOService;
+import org.trellisldp.api.MementoService;
 import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.RDFaWriterService;
 import org.trellisldp.api.ResourceService;
@@ -49,6 +50,7 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
     private AuditService auditService;
     private IOService ioService;
     private AgentService agentService;
+    private MementoService mementoService;
 
     /**
      * Create a new application service bundler.
@@ -62,6 +64,7 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
         auditService = resourceService = new DBResourceService(jdbi);
         ioService = buildIoService(config, jdbi);
         agentService = new SimpleAgentService();
+        mementoService = new EnhancedMementoService(jdbi);
     }
 
     @Override
@@ -82,6 +85,11 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
     @Override
     public AuditService getAuditService() {
         return auditService;
+    }
+
+    @Override
+    public MementoService getMementoService() {
+        return mementoService;
     }
 
     private static IOService buildIoService(final AppConfiguration config, final Jdbi jdbi) {
