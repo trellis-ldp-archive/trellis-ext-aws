@@ -21,11 +21,14 @@ import org.trellisldp.agent.SimpleAgentService;
 import org.trellisldp.api.AgentService;
 import org.trellisldp.api.AuditService;
 import org.trellisldp.api.IOService;
+import org.trellisldp.api.MementoService;
 import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.ResourceService;
 import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
+import org.trellisldp.ext.aws.S3MementoService;
 import org.trellisldp.ext.db.DBNamespaceService;
 import org.trellisldp.ext.db.DBResourceService;
+import org.trellisldp.ext.db.DBWrappedMementoService;
 import org.trellisldp.io.JenaIOService;
 import org.trellisldp.rdfa.HtmlSerializer;
 
@@ -38,6 +41,7 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
     private AgentService agentService;
     private AuditService auditService;
     private IOService ioService;
+    private MementoService mementoService;
     private DBResourceService resourceService;
 
     /**
@@ -50,12 +54,18 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
         final NamespaceService nsService = new DBNamespaceService(jdbi);
         agentService = new SimpleAgentService();
         ioService = new JenaIOService(nsService, new HtmlSerializer(nsService));
+        mementoService = new DBWrappedMementoService(jdbi, new S3MementoService());
         auditService = resourceService = new DBResourceService(jdbi);
     }
 
     @Override
     public ResourceService getResourceService() {
         return resourceService;
+    }
+
+    @Override
+    public MementoService getMementoService() {
+        return mementoService;
     }
 
     @Override

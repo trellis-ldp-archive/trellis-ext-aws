@@ -32,8 +32,10 @@ import org.trellisldp.api.RDFaWriterService;
 import org.trellisldp.api.ResourceService;
 import org.trellisldp.app.TrellisCache;
 import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
+import org.trellisldp.ext.aws.S3MementoService;
 import org.trellisldp.ext.db.DBNamespaceService;
 import org.trellisldp.ext.db.DBResourceService;
+import org.trellisldp.ext.db.DBWrappedMementoService;
 import org.trellisldp.io.JenaIOService;
 import org.trellisldp.rdfa.HtmlSerializer;
 
@@ -64,7 +66,7 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
         auditService = resourceService = new DBResourceService(jdbi);
         ioService = buildIoService(config, jdbi);
         agentService = new SimpleAgentService();
-        mementoService = new EnhancedMementoService(jdbi);
+        mementoService = new DBWrappedMementoService(jdbi, new S3MementoService());
     }
 
     @Override
