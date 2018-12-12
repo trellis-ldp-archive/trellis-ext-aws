@@ -16,6 +16,7 @@ package org.trellisldp.ext.aws;
 import static com.amazonaws.services.s3.AmazonS3ClientBuilder.defaultClient;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Base64.getEncoder;
+import static java.util.Collections.emptyMap;
 import static java.util.concurrent.CompletableFuture.allOf;
 import static org.apache.commons.codec.digest.DigestUtils.getDigest;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -70,7 +71,7 @@ public class S3BinaryServiceTest {
         final BinaryService svc = new S3BinaryService();
         final InputStream input = getClass().getResourceAsStream("/file.txt");
         assertDoesNotThrow(svc.setContent(BinaryMetadata.builder(identifier).mimeType("text/plain").build(),
-                    input)::join);
+                    input, emptyMap())::join);
         svc.get(identifier).thenAccept(binary -> {
             assertEquals((Long) 22L, binary.getSize());
             try {
@@ -131,7 +132,7 @@ public class S3BinaryServiceTest {
         final BinaryService svc = new S3BinaryService();
         final IRI identifier = rdf.createIRI(svc.generateIdentifier());
         assertThrows(CompletionException.class,
-                svc.setContent(BinaryMetadata.builder(identifier).build(), throwingMockInputStream)::join);
+                svc.setContent(BinaryMetadata.builder(identifier).build(), throwingMockInputStream, emptyMap())::join);
     }
 
     @Test

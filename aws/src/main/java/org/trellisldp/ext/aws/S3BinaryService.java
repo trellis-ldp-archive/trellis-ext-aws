@@ -44,6 +44,8 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -107,7 +109,8 @@ public class S3BinaryService implements BinaryService {
     }
 
     @Override
-    public CompletableFuture<Void> setContent(final BinaryMetadata metadata, final InputStream stream) {
+    public CompletableFuture<Void> setContent(final BinaryMetadata metadata, final InputStream stream,
+            final Map<String, List<String>> hints) {
         return runAsync(() -> {
             try {
                 bufferUpload(metadata, stream, Files.createTempFile("trellis-binary", ".tmp"));
