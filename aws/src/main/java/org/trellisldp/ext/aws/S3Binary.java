@@ -51,7 +51,7 @@ public class S3Binary implements Binary {
     }
 
     @Override
-    public Long getSize() {
+    public long getSize() {
         return obj.getObjectMetadata().getInstanceLength();
     }
 }
