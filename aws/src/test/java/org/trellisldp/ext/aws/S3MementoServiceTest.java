@@ -68,7 +68,7 @@ public class S3MementoServiceTest {
 
     private static final RDF rdf = getInstance();
     private static final IRI root = rdf.createIRI(TRELLIS_DATA_PREFIX);
-    private static final Integer length = 10;
+    private static final int length = 10;
     private static final String base = new RandomStringGenerator.Builder().withinRange('a', 'z')
         .build().generate(length);
 

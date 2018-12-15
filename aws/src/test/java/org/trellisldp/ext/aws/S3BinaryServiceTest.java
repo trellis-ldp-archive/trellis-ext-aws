@@ -53,7 +53,7 @@ import org.trellisldp.api.BinaryService;
 public class S3BinaryServiceTest {
 
     private static final RDF rdf = getInstance();
-    private static final Integer length = 10;
+    private static final int length = 10;
     private static final String base = new RandomStringGenerator.Builder().withinRange('a', 'z')
         .build().generate(length);
 

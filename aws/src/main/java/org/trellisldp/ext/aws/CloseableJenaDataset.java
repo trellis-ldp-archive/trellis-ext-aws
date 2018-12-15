@@ -71,7 +71,7 @@ class CloseableJenaDataset implements AutoCloseable {
      * Check for ACL triples.
      * @return true if there are ACL triples; false otherwise
      */
-    public Boolean hasAcl() {
+    public boolean hasAcl() {
         return dataset.contains(of(Trellis.PreferAccessControl), null, null, null);
     }
 

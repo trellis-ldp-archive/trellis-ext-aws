@@ -122,7 +122,7 @@ public class S3Resource implements Resource {
     }
 
     @Override
-    public Boolean hasAcl() {
+    public boolean hasAcl() {
         return ofNullable(metadata.getUserMetaDataOf(HAS_ACL)).isPresent();
     }
 
