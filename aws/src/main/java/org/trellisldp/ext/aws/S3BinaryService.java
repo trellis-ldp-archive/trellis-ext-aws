@@ -100,7 +100,7 @@ public class S3BinaryService implements BinaryService {
 
     @Override
     public CompletableFuture<Binary> get(final IRI identifier) {
-        return supplyAsync(() -> new S3Binary(client, client.getObject(bucketName, getKey(identifier))));
+        return supplyAsync(() -> new S3Binary(client, bucketName, getKey(identifier)));
     }
 
     @Override

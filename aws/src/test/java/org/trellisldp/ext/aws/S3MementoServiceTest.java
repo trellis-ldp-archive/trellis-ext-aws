@@ -145,7 +145,7 @@ public class S3MementoServiceTest {
     public void testMementoNonRDFSource() {
         final IRI identifier = rdf.createIRI(TRELLIS_DATA_PREFIX + "mementos/" + base + "/binary");
         final BinaryMetadata binary = BinaryMetadata.builder(rdf.createIRI("s3://bucket/binary")).mimeType("text/plain")
-            .size(40L).build();
+            .build();
         final Resource res = mock(Resource.class);
         final Instant time = now();
         final Quad quad = rdf.createQuad(Trellis.PreferUserManaged, identifier, DC.title, rdf.createLiteral("Title"));
@@ -170,7 +170,6 @@ public class S3MementoServiceTest {
             assertTrue(r.getBinaryMetadata().isPresent());
             r.getBinaryMetadata().ifPresent(b -> {
                 assertEquals(binary.getIdentifier(), b.getIdentifier());
-                assertEquals(binary.getSize(), b.getSize());
                 assertEquals(binary.getMimeType(), b.getMimeType());
             });
             assertFalse(r.getContainer().isPresent());

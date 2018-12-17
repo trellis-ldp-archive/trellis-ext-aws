@@ -53,9 +53,7 @@ public class S3Resource implements Resource {
     public static final String MEMBER_OF_RELATION = "trellis.isMemberOfRelation";
     public static final String INSERTED_CONTENT_RELATION = "trellis.insertedContentRelation";
     public static final String BINARY_LOCATION = "trellis.binaryLocation";
-    public static final String BINARY_DATE = "trellis.binaryDate";
     public static final String BINARY_TYPE = "trellis.binaryMimeType";
-    public static final String BINARY_SIZE = "trellis.binarySize";
 
     private static final JenaRDF rdf = new JenaRDF();
 
@@ -130,9 +128,8 @@ public class S3Resource implements Resource {
     public Optional<BinaryMetadata> getBinaryMetadata() {
         final String binaryLocation = metadata.getUserMetaDataOf(BINARY_LOCATION);
         final String binaryType = metadata.getUserMetaDataOf(BINARY_TYPE);
-        final Long binarySize = ofNullable(metadata.getUserMetaDataOf(BINARY_SIZE)).map(Long::parseLong).orElse(null);
         return ofNullable(binaryLocation).map(rdf::createIRI)
-            .map(loc -> BinaryMetadata.builder(loc).mimeType(binaryType).size(binarySize).build());
+            .map(loc -> BinaryMetadata.builder(loc).mimeType(binaryType).build());
     }
 
     @Override

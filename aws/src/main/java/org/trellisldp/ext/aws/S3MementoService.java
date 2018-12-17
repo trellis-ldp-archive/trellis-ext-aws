@@ -107,7 +107,6 @@ public class S3MementoService implements MementoService {
                 resource.getBinaryMetadata().ifPresent(b -> {
                     metadata.put(S3Resource.BINARY_LOCATION, b.getIdentifier().getIRIString());
                     b.getMimeType().ifPresent(m -> metadata.put(S3Resource.BINARY_TYPE, m));
-                    b.getSize().ifPresent(s -> metadata.put(S3Resource.BINARY_SIZE, Long.toString(s)));
                 });
                 resource.getMembershipResource().map(IRI::getIRIString)
                     .ifPresent(m -> metadata.put(S3Resource.MEMBERSHIP_RESOURCE, m));

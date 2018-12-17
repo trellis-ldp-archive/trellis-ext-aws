@@ -73,7 +73,6 @@ public class S3BinaryServiceTest {
         assertDoesNotThrow(svc.setContent(BinaryMetadata.builder(identifier).mimeType("text/plain").build(),
                     input, emptyMap())::join);
         svc.get(identifier).thenAccept(binary -> {
-            assertEquals(22L, binary.getSize());
             try {
                 assertEquals("A sample binary file.", IOUtils.toString(binary.getContent(), UTF_8).trim());
             } catch (final IOException ex) {
@@ -82,7 +81,6 @@ public class S3BinaryServiceTest {
         }).join();
 
         svc.get(identifier).thenAccept(binary -> {
-            assertEquals(22L, binary.getSize());
             try {
                 assertEquals("ple bi", IOUtils.toString(binary.getContent(5, 10), UTF_8).trim());
             } catch (final IOException ex) {

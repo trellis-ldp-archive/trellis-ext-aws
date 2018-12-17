@@ -15,7 +15,6 @@ package org.trellisldp.ext.aws;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
 
 import java.io.InputStream;
 
@@ -26,32 +25,29 @@ import org.trellisldp.api.Binary;
  */
 public class S3Binary implements Binary {
 
-    private final S3Object obj;
     private final AmazonS3 client;
+    private final String bucketName;
+    private final String key;
 
     /**
      * Create an S3-based Binary object.
      * @param client the aws client
-     * @param obj the s3 object
+     * @param bucketName the bucket name
+     * @param key the key
      */
-    public S3Binary(final AmazonS3 client, final S3Object obj) {
+    public S3Binary(final AmazonS3 client, final String bucketName, final String key) {
         this.client = client;
-        this.obj = obj;
+        this.bucketName = bucketName;
+        this.key = key;
     }
 
     @Override
     public InputStream getContent() {
-        return obj.getObjectContent();
+        return client.getObject(new GetObjectRequest(bucketName, key)).getObjectContent();
     }
 
     @Override
     public InputStream getContent(final int from, final int to) {
-        return client.getObject(new GetObjectRequest(obj.getBucketName(), obj.getKey())
-                .withRange(from, to)).getObjectContent();
-    }
-
-    @Override
-    public long getSize() {
-        return obj.getObjectMetadata().getInstanceLength();
+        return client.getObject(new GetObjectRequest(bucketName, key).withRange(from, to)).getObjectContent();
     }
 }
