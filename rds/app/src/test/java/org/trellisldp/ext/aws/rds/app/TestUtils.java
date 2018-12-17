@@ -41,7 +41,7 @@ final class TestUtils {
 
     private static final AmazonS3 client = defaultClient();
 
-    public static String randomString(final Integer length) {
+    public static String randomString(final int length) {
         return new RandomStringGenerator.Builder().withinRange('a', 'z').build().generate(length);
     }
 
