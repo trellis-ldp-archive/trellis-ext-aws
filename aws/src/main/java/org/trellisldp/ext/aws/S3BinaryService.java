@@ -67,7 +67,6 @@ public class S3BinaryService implements BinaryService {
     public static final String CONFIG_BINARY_BUCKET = "trellis.s3.binary.bucket";
     public static final String CONFIG_BINARY_PATH_PREFIX = "trellis.s3.binary.path.prefix";
 
-    private static final Configuration config = getConfiguration();
     private static final String PREFIX = "s3://";
     private static final String SHA = "SHA";
     private static final Set<String> algorithms = asList(MD5, MD2, SHA, SHA_1, SHA_256, SHA_384, SHA_512,
@@ -83,7 +82,11 @@ public class S3BinaryService implements BinaryService {
      * Create an S3-based binary service.
      */
     public S3BinaryService() {
-        this(defaultClient(), config.get(CONFIG_BINARY_BUCKET), config.get(CONFIG_BINARY_PATH_PREFIX));
+        this(defaultClient(), getConfiguration());
+    }
+
+    private S3BinaryService(final AmazonS3 client, final Configuration config) {
+        this(client, config.get(CONFIG_BINARY_BUCKET), config.get(CONFIG_BINARY_PATH_PREFIX));
     }
 
     /**

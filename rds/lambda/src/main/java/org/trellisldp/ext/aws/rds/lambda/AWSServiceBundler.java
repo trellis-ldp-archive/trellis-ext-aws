@@ -37,7 +37,6 @@ import org.trellisldp.rdfa.HtmlSerializer;
  */
 public class AWSServiceBundler extends AbstractAWSServiceBundler {
 
-    private static final Configuration config = getConfiguration();
     private AgentService agentService;
     private AuditService auditService;
     private IOService ioService;
@@ -49,6 +48,7 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
      */
     public AWSServiceBundler() {
         super();
+        final Configuration config = getConfiguration();
         final Jdbi jdbi = Jdbi.create(config.get("trellis.jdbc.url"), config.get("trellis.jdbc.username"),
                 config.get("trellis.jdbc.password"));
         final NamespaceService nsService = new DBNamespaceService(jdbi);

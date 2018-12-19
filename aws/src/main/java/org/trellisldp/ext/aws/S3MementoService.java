@@ -69,7 +69,6 @@ public class S3MementoService implements MementoService {
     public static final String CONFIG_MEMENTO_PATH_PREFIX = "trellis.s3.memento.path.prefix";
 
     private static final JenaRDF rdf = new JenaRDF();
-    private static final Configuration config = getConfiguration();
 
     private final AmazonS3 client;
     private final String bucketName;
@@ -79,17 +78,21 @@ public class S3MementoService implements MementoService {
      * Create an S3-based memento service.
      */
     public S3MementoService() {
-        this(defaultClient(), config.get(CONFIG_MEMENTO_BUCKET), config.get(CONFIG_MEMENTO_PATH_PREFIX));
+        this(defaultClient(), getConfiguration());
+    }
+
+    private S3MementoService(final AmazonS3 client, final Configuration config) {
+        this(client, config.get(CONFIG_MEMENTO_BUCKET), config.get(CONFIG_MEMENTO_PATH_PREFIX));
     }
 
     /**
      * Create an S3-based memento service.
-     * @param s3Client the S3 client
+     * @param client the S3 client
      * @param bucketName the bucket name
      * @param pathPrefix the path prefix for mementos, may be {@code null}
      */
-    public S3MementoService(final AmazonS3 s3Client, final String bucketName, final String pathPrefix) {
-        this.client = requireNonNull(s3Client, "S3 client may not be null!");
+    public S3MementoService(final AmazonS3 client, final String bucketName, final String pathPrefix) {
+        this.client = requireNonNull(client, "S3 client may not be null!");
         this.bucketName = requireNonNull(bucketName, "AWS Bucket may not be null!");
         this.pathPrefix = ofNullable(pathPrefix).orElse("");
     }

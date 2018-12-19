@@ -69,8 +69,7 @@ public class SNSEventServiceTest {
 
     @Test
     public void testEventError() {
-        final EventService svc = new SNSEventService("arn:aws:sns:us-east-1:12345678:NonExistentTopic",
-                defaultClient());
+        final EventService svc = new SNSEventService(defaultClient(), "arn:aws:sns:us-east-1:12345678:NonExistent");
         svc.emit(mockEvent);
         verify(mockEvent).getIdentifier();
     }

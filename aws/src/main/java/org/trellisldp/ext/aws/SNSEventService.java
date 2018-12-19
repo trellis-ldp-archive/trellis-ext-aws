@@ -46,17 +46,17 @@ public class SNSEventService implements EventService {
      * Cretae an SNS-bases notification service.
      */
     public SNSEventService() {
-        this(getConfiguration().get(TRELLIS_SNS_TOPIC), defaultClient());
+        this(defaultClient(), getConfiguration().get(TRELLIS_SNS_TOPIC));
     }
 
     /**
      * Cretae an SNS-bases notification service.
+     * @param client the SNS client
      * @param topic the topic ARN
-     * @param sns the SNS service
      */
-    public SNSEventService(final String topic, final AmazonSNS sns) {
+    public SNSEventService(final AmazonSNS client, final String topic) {
+        this.sns = requireNonNull(client, "the SNS client may not be null!");
         this.topic = topic;
-        this.sns = sns;
     }
 
     @Override
