@@ -14,8 +14,7 @@
 package org.trellisldp.ext.aws.neptune.app;
 
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
