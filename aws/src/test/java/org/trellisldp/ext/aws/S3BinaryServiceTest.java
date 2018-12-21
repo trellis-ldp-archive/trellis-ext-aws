@@ -16,7 +16,6 @@ package org.trellisldp.ext.aws;
 import static com.amazonaws.services.s3.AmazonS3ClientBuilder.defaultClient;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Base64.getEncoder;
-import static java.util.Collections.emptyMap;
 import static java.util.concurrent.CompletableFuture.allOf;
 import static org.apache.commons.codec.digest.DigestUtils.getDigest;
 import static org.junit.jupiter.api.Assertions.*;
@@ -66,7 +65,7 @@ public class S3BinaryServiceTest {
         final BinaryService svc = new S3BinaryService();
         final InputStream input = getClass().getResourceAsStream("/file.txt");
         assertDoesNotThrow(svc.setContent(BinaryMetadata.builder(identifier).mimeType("text/plain").build(),
-                    input, emptyMap())::join);
+                    input)::join);
         svc.get(identifier).thenAccept(binary -> {
             try {
                 assertEquals("A sample binary file.", IOUtils.toString(binary.getContent(), UTF_8).trim());
@@ -85,9 +84,9 @@ public class S3BinaryServiceTest {
 
         allOf(
             svc.calculateDigest(identifier, getDigest("MD5")).thenAccept(digest ->
-                assertEquals("ZyNmQT2UvueO5DCvzcaLZw==", getEncoder().encodeToString(digest))),
+                assertEquals("ZyNmQT2UvueO5DCvzcaLZw==", getEncoder().encodeToString(digest.digest()))),
             svc.calculateDigest(identifier, getDigest("SHA-1")).thenAccept(digest ->
-                assertEquals("o4nMi5wcx3VRpahNOT6Rfh9Pd3c=", getEncoder().encodeToString(digest)))).join();
+                assertEquals("o4nMi5wcx3VRpahNOT6Rfh9Pd3c=", getEncoder().encodeToString(digest.digest())))).join();
 
         assertDoesNotThrow(svc.purgeContent(identifier)::join);
     }
@@ -125,7 +124,7 @@ public class S3BinaryServiceTest {
         final BinaryService svc = new S3BinaryService();
         final IRI identifier = rdf.createIRI(svc.generateIdentifier());
         assertThrows(CompletionException.class,
-                svc.setContent(BinaryMetadata.builder(identifier).build(), throwingMockInputStream, emptyMap())::join);
+                svc.setContent(BinaryMetadata.builder(identifier).build(), throwingMockInputStream)::join);
     }
 
     @Test

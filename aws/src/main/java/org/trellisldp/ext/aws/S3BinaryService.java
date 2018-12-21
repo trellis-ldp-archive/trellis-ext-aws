@@ -44,8 +44,6 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -112,8 +110,7 @@ public class S3BinaryService implements BinaryService {
     }
 
     @Override
-    public CompletableFuture<Void> setContent(final BinaryMetadata metadata, final InputStream stream,
-            final Map<String, List<String>> hints) {
+    public CompletableFuture<Void> setContent(final BinaryMetadata metadata, final InputStream stream) {
         return runAsync(() -> {
             try {
                 bufferUpload(metadata, stream, Files.createTempFile("trellis-binary", ".tmp"));
@@ -124,7 +121,7 @@ public class S3BinaryService implements BinaryService {
     }
 
     @Override
-    public CompletableFuture<byte[]> calculateDigest(final IRI identifier, final MessageDigest algorithm) {
+    public CompletableFuture<MessageDigest> calculateDigest(final IRI identifier, final MessageDigest algorithm) {
         return supplyAsync(() -> computeDigest(bucketName, getKey(identifier), algorithm));
     }
 
@@ -155,9 +152,9 @@ public class S3BinaryService implements BinaryService {
         }
     }
 
-    private byte[] computeDigest(final String bucket, final String key, final MessageDigest algorithm) {
+    private MessageDigest computeDigest(final String bucket, final String key, final MessageDigest algorithm) {
         try (final InputStream input = client.getObject(bucket, key).getObjectContent()) {
-            return updateDigest(algorithm, input).digest();
+            return updateDigest(algorithm, input);
         } catch (final IOException ex) {
             throw new UncheckedIOException("Error computing digest", ex);
         }
