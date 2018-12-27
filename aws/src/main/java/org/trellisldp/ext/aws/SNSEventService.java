@@ -15,11 +15,15 @@ package org.trellisldp.ext.aws;
 
 import static com.amazonaws.services.sns.AmazonSNSClientBuilder.defaultClient;
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.of;
+import static java.util.ServiceLoader.load;
 import static org.apache.tamaya.ConfigurationProvider.getConfiguration;
 import static org.slf4j.LoggerFactory.getLogger;
-import static org.trellisldp.api.TrellisUtils.findFirst;
 
 import com.amazonaws.services.sns.AmazonSNS;
+
+import java.util.Iterator;
+import java.util.ServiceLoader;
 
 import org.slf4j.Logger;
 import org.trellisldp.api.ActivityStreamService;
@@ -36,7 +40,8 @@ public class SNSEventService implements EventService {
     public static final String TRELLIS_SNS_TOPIC = "trellis.sns.topic";
 
     private static final Logger LOGGER = getLogger(SNSEventService.class);
-    private static final ActivityStreamService service = findFirst(ActivityStreamService.class)
+    private static final ActivityStreamService service = of(load(ActivityStreamService.class))
+        .map(ServiceLoader::iterator).filter(Iterator::hasNext).map(Iterator::next)
         .orElseThrow(() -> new RuntimeTrellisException("No ActivityStream service available!"));
 
     private final AmazonSNS sns;
