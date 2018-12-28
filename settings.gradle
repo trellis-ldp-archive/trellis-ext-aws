@@ -1,4 +1,3 @@
-enableFeaturePreview('STABLE_PUBLISHING')
 rootProject.name = 'trellis-ext-aws'
 include ':trellis-aws'
 include ':trellis-aws-neptune-app'
