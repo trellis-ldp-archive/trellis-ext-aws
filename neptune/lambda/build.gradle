@@ -12,7 +12,8 @@ dependencies {
 
     implementation("com.amazonaws.serverless:aws-serverless-java-container-jersey:$awsJerseyVersion")
     implementation("commons-codec:commons-codec:$commonsCodecVersion")
-    implementation("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
+    implementation("org.apache.jena:jena-arq:$jenaVersion")
+    implementation("org.apache.jena:jena-rdfconnection:$jenaVersion")
     implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
     implementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
