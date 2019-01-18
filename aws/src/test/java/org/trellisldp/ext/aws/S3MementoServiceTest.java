@@ -95,7 +95,7 @@ public class S3MementoServiceTest {
         when(res.stream()).thenAnswer(inv -> Stream.of(quad, acl));
 
         final MementoService svc = new S3MementoService();
-        assertDoesNotThrow(svc.put(res)::join);
+        assertDoesNotThrow(svc.put(res).toCompletableFuture()::join);
         svc.get(identifier, time).thenAccept(r -> {
             assertEquals(identifier, r.getIdentifier());
             assertEquals(LDP.RDFSource, r.getInteractionModel());
@@ -108,7 +108,7 @@ public class S3MementoServiceTest {
             assertFalse(r.getMemberOfRelation().isPresent());
             assertFalse(r.getInsertedContentRelation().isPresent());
             assertTrue(r.hasAcl());
-        }).join();
+        }).toCompletableFuture().join();
 
         final Resource res2 = mock(Resource.class);
         final Instant time2 = time.plusSeconds(10L);
@@ -124,7 +124,7 @@ public class S3MementoServiceTest {
         when(res2.getMemberOfRelation()).thenReturn(empty());
         when(res2.getInsertedContentRelation()).thenReturn(empty());
         when(res2.stream()).thenAnswer(inv -> Stream.of(quad2, acl));
-        assertDoesNotThrow(svc.put(res2)::join);
+        assertDoesNotThrow(svc.put(res2).toCompletableFuture()::join);
 
         svc.mementos(identifier).thenAccept(mementos -> {
             assertTrue(mementos.contains(time.truncatedTo(SECONDS)));
@@ -157,7 +157,7 @@ public class S3MementoServiceTest {
         when(res.stream()).thenAnswer(inv -> Stream.of(quad));
 
         final MementoService svc = new S3MementoService();
-        assertDoesNotThrow(svc.put(res)::join);
+        assertDoesNotThrow(svc.put(res).toCompletableFuture()::join);
         svc.get(identifier, time).thenAccept(r -> {
             assertEquals(identifier, r.getIdentifier());
             assertEquals(LDP.NonRDFSource, r.getInteractionModel());
@@ -174,7 +174,7 @@ public class S3MementoServiceTest {
             assertFalse(r.getMemberOfRelation().isPresent());
             assertFalse(r.getInsertedContentRelation().isPresent());
             assertFalse(r.hasAcl());
-        }).join();
+        }).toCompletableFuture().join();
 
         svc.mementos(identifier).thenAccept(mementos -> assertTrue(mementos.contains(time)));
         svc.get(identifier, time.minusSeconds(10L)).thenAccept(r -> assertEquals(MISSING_RESOURCE, r));
@@ -200,7 +200,7 @@ public class S3MementoServiceTest {
         when(res.stream()).thenAnswer(inv -> Stream.of(quad, acl));
 
         final MementoService svc = new S3MementoService();
-        assertDoesNotThrow(svc.put(res)::join);
+        assertDoesNotThrow(svc.put(res).toCompletableFuture()::join);
         svc.get(identifier, time).thenAccept(r -> {
             assertEquals(identifier, r.getIdentifier());
             assertEquals(LDP.IndirectContainer, r.getInteractionModel());
@@ -213,7 +213,7 @@ public class S3MementoServiceTest {
             assertEquals(of(DC.isPartOf), r.getMemberOfRelation());
             assertEquals(of(LDP.MemberSubject), r.getInsertedContentRelation());
             assertTrue(r.hasAcl());
-        }).join();
+        }).toCompletableFuture().join();
 
         svc.mementos(identifier).thenAccept(mementos -> assertTrue(mementos.contains(time)));
     }
@@ -226,7 +226,7 @@ public class S3MementoServiceTest {
         });
 
         final MementoService svc = new S3MementoService();
-        assertThrows(CompletionException.class, svc.put(res)::join);
+        assertThrows(CompletionException.class, svc.put(res).toCompletableFuture()::join);
     }
 
     @Test
@@ -246,7 +246,7 @@ public class S3MementoServiceTest {
         when(mockResult.isTruncated()).thenReturn(true).thenReturn(false);
         final IRI identifier = rdf.createIRI(TRELLIS_DATA_PREFIX + "mementos/" + base + "/container");
         final MementoService svc = new S3MementoService(mockClient, "bucket", null);
-        final SortedSet<Instant> m = svc.mementos(identifier).join();
+        final SortedSet<Instant> m = svc.mementos(identifier).toCompletableFuture().join();
         assertEquals(2L, m.size());
     }
 

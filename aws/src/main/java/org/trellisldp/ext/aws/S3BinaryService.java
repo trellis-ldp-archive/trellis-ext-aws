@@ -45,7 +45,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.rdf.api.IRI;
@@ -100,17 +100,17 @@ public class S3BinaryService implements BinaryService {
     }
 
     @Override
-    public CompletableFuture<Binary> get(final IRI identifier) {
+    public CompletionStage<Binary> get(final IRI identifier) {
         return supplyAsync(() -> new S3Binary(client, bucketName, getKey(identifier)));
     }
 
     @Override
-    public CompletableFuture<Void> purgeContent(final IRI identifier) {
+    public CompletionStage<Void> purgeContent(final IRI identifier) {
         return runAsync(() -> client.deleteObject(bucketName, getKey(identifier)));
     }
 
     @Override
-    public CompletableFuture<Void> setContent(final BinaryMetadata metadata, final InputStream stream) {
+    public CompletionStage<Void> setContent(final BinaryMetadata metadata, final InputStream stream) {
         return runAsync(() -> {
             try {
                 bufferUpload(metadata, stream, Files.createTempFile("trellis-binary", ".tmp"));
@@ -121,7 +121,7 @@ public class S3BinaryService implements BinaryService {
     }
 
     @Override
-    public CompletableFuture<MessageDigest> calculateDigest(final IRI identifier, final MessageDigest algorithm) {
+    public CompletionStage<MessageDigest> calculateDigest(final IRI identifier, final MessageDigest algorithm) {
         return supplyAsync(() -> computeDigest(bucketName, getKey(identifier), algorithm));
     }
 

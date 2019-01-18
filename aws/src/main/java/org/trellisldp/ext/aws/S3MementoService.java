@@ -46,7 +46,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.stream.Stream;
 
 import org.apache.commons.rdf.api.IRI;
@@ -98,7 +98,7 @@ public class S3MementoService implements MementoService {
     }
 
     @Override
-    public CompletableFuture<Void> put(final Resource resource) {
+    public CompletionStage<Void> put(final Resource resource) {
         return runAsync(() -> {
             try {
                 final File file = createTempFile("trellis-memento-", ".nq");
@@ -144,7 +144,7 @@ public class S3MementoService implements MementoService {
     }
 
     @Override
-    public CompletableFuture<Resource> get(final IRI identifier, final Instant time) {
+    public CompletionStage<Resource> get(final IRI identifier, final Instant time) {
         return supplyAsync(() ->  {
             final String key = getKey(identifier, time.truncatedTo(SECONDS));
             if (client.doesObjectExist(bucketName, key)) {
@@ -163,7 +163,7 @@ public class S3MementoService implements MementoService {
     }
 
     @Override
-    public CompletableFuture<SortedSet<Instant>> mementos(final IRI identifier) {
+    public CompletionStage<SortedSet<Instant>> mementos(final IRI identifier) {
         return supplyAsync(() -> listMementos(identifier));
     }
 

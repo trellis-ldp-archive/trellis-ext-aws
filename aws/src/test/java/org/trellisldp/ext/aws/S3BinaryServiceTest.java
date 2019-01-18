@@ -65,14 +65,14 @@ public class S3BinaryServiceTest {
         final BinaryService svc = new S3BinaryService();
         final InputStream input = getClass().getResourceAsStream("/file.txt");
         assertDoesNotThrow(svc.setContent(BinaryMetadata.builder(identifier).mimeType("text/plain").build(),
-                    input)::join);
+                    input).toCompletableFuture()::join);
         svc.get(identifier).thenAccept(binary -> {
             try {
                 assertEquals("A sample binary file.", IOUtils.toString(binary.getContent(), UTF_8).trim());
             } catch (final IOException ex) {
                 fail("Error reading IO stream", ex);
             }
-        }).join();
+        }).toCompletableFuture().join();
 
         svc.get(identifier).thenAccept(binary -> {
             try {
@@ -80,15 +80,17 @@ public class S3BinaryServiceTest {
             } catch (final IOException ex) {
                 fail("Error reading IO stream", ex);
             }
-        }).join();
+        }).toCompletableFuture().join();
 
         allOf(
             svc.calculateDigest(identifier, getDigest("MD5")).thenAccept(digest ->
-                assertEquals("ZyNmQT2UvueO5DCvzcaLZw==", getEncoder().encodeToString(digest.digest()))),
+                assertEquals("ZyNmQT2UvueO5DCvzcaLZw==", getEncoder().encodeToString(digest.digest())))
+                .toCompletableFuture(),
             svc.calculateDigest(identifier, getDigest("SHA-1")).thenAccept(digest ->
-                assertEquals("o4nMi5wcx3VRpahNOT6Rfh9Pd3c=", getEncoder().encodeToString(digest.digest())))).join();
+                assertEquals("o4nMi5wcx3VRpahNOT6Rfh9Pd3c=", getEncoder().encodeToString(digest.digest())))
+                .toCompletableFuture()).join();
 
-        assertDoesNotThrow(svc.purgeContent(identifier)::join);
+        assertDoesNotThrow(svc.purgeContent(identifier).toCompletableFuture()::join);
     }
 
     @Test
@@ -104,7 +106,7 @@ public class S3BinaryServiceTest {
         assertDoesNotThrow(svc.get(identifier).handle((v, err) -> {
             assertNotNull(err);
             return null;
-        })::join);
+        }).toCompletableFuture()::join);
     }
 
     @Test
@@ -124,7 +126,8 @@ public class S3BinaryServiceTest {
         final BinaryService svc = new S3BinaryService();
         final IRI identifier = rdf.createIRI(svc.generateIdentifier());
         assertThrows(CompletionException.class,
-                svc.setContent(BinaryMetadata.builder(identifier).build(), throwingMockInputStream)::join);
+                svc.setContent(BinaryMetadata.builder(identifier).build(),
+                    throwingMockInputStream).toCompletableFuture()::join);
     }
 
     @Test
@@ -141,6 +144,6 @@ public class S3BinaryServiceTest {
         final IRI identifier = rdf.createIRI(svc.generateIdentifier());
 
         assertThrows(CompletionException.class,
-                svc.calculateDigest(identifier, MessageDigest.getInstance("MD5"))::join);
+                svc.calculateDigest(identifier, MessageDigest.getInstance("MD5")).toCompletableFuture()::join);
     }
 }
