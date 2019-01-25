@@ -15,7 +15,7 @@ ext {
 
     /* Dependencies */
     awsJerseyVersion = '1.3'
-    awsVersion = '1.11.487'
+    awsVersion = '1.11.489'
     commonsCodecVersion = '1.11'
     commonsCompressVersion = '1.18'
     commonsRdfVersion = '0.5.0'
@@ -36,7 +36,7 @@ ext {
     /* Testing */
     activationVersion = '1.1.1'
     apiguardianVersion = '1.0.0'
-    awaitilityVersion = '3.1.5'
+    awaitilityVersion = '3.1.6'
     checkstyleVersion = '8.12'
     commonsIoVersion = '2.6'
     commonsTextVersion = '1.6'
