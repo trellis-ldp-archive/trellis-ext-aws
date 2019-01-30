@@ -53,11 +53,10 @@ jobs:
           stage: deploy
           jdk: oraclejdk8
           env: JOB=docker
+          # TODO add support for maintenance branches
           if: branch = master AND type = push
           before_script: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-          # TODO uncomment this line just before the 0.1 release
-          # script: if [[ $(./gradlew -q getVersion) == *SNAPSHOT* ]]; then ./gradlew dockerPush; else ./gradlew dockerPush dockerPushLatest; fi
-          script: ./gradlew dockerPush dockerPushLatest dockerPushDevelop
+          script: if [[ $(./gradlew -q getVersion) == *SNAPSHOT* ]]; then ./gradlew dockerPush dockerPushDevelop; else ./gradlew dockerPush dockerPushLatest; fi
 
         # deploy to AWS
         - name: "Publish JavaDocs"
