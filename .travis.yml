@@ -44,7 +44,7 @@ jobs:
           stage: deploy
           jdk: oraclejdk8
           env: JOB=sonatype
-          if: branch = master AND type = push
+          if: branch = trellis-ext-aws-0.1.x AND type = push
           # Only automate the publication of SNAPSHOTS
           script: if [[ $(./gradlew -q getVersion) == *SNAPSHOT* ]]; then ./gradlew publish ; fi
 
@@ -53,8 +53,7 @@ jobs:
           stage: deploy
           jdk: oraclejdk8
           env: JOB=docker
-          # TODO add support for maintenance branches
-          if: branch = master AND type = push
+          if: branch = trellis-ext-aws-0.1.x AND type = push
           before_script: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
           script: if [[ $(./gradlew -q getVersion) == *SNAPSHOT* ]]; then ./gradlew dockerPush dockerPushDevelop; else ./gradlew dockerPush dockerPushLatest; fi
 
@@ -63,7 +62,7 @@ jobs:
           stage: deploy
           jdk: oraclejdk8
           env: JOB=aws
-          if: branch = master AND type = push
+          if: branch = trellis-ext-aws-0.1.x AND type = push
           script: ./gradlew apidocs
           deploy:
               provider: s3
