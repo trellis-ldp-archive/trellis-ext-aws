@@ -25,8 +25,8 @@ ext {
     jenaVersion = '3.10.0'
     jdbiVersion = '3.6.0'
     tamayaVersion = '0.3-incubating'
-    trellisVersion = '0.8.0-SNAPSHOT'
-    trellisDbVersion = '0.2.0-SNAPSHOT'
+    trellisVersion = '0.8.0'
+    trellisDbVersion = '0.2.0'
     snakeyamlVersion = '1.23'
 
     /* Databases */
@@ -78,9 +78,6 @@ allprojects { subproj ->
         mavenCentral()
         jcenter()
         mavenLocal()
-		maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots"
-        }
     }
 
     dependencies {
