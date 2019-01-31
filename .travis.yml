@@ -55,7 +55,7 @@ jobs:
           env: JOB=docker
           if: branch = trellis-ext-aws-0.1.x AND type = push
           before_script: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-          script: if [[ $(./gradlew -q getVersion) == *SNAPSHOT* ]]; then ./gradlew dockerPush dockerPushDevelop; else ./gradlew dockerPush dockerPushLatest; fi
+          script: if [[ $(./gradlew -q getVersion) == *SNAPSHOT* ]]; then ./gradlew dockerPush; else ./gradlew dockerPush dockerPushLatest; fi
 
         # deploy to AWS
         - name: "Publish JavaDocs"
