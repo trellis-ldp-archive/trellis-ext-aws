@@ -53,9 +53,9 @@ import org.apache.tamaya.Configuration;
 import org.trellisldp.api.Binary;
 import org.trellisldp.api.BinaryMetadata;
 import org.trellisldp.api.BinaryService;
+import org.trellisldp.api.DefaultIdentifierService;
 import org.trellisldp.api.IdentifierService;
 import org.trellisldp.api.RuntimeTrellisException;
-import org.trellisldp.id.UUIDGenerator;
 
 /**
  * An S3-based binary service.
@@ -71,7 +71,7 @@ public class S3BinaryService implements BinaryService {
             SHA3_256, SHA3_384, SHA3_512).stream()
         .collect(toSet());
 
-    private final IdentifierService idService = new UUIDGenerator();
+    private final IdentifierService idService = new DefaultIdentifierService();
     private final AmazonS3 client;
     private final String bucketName;
     private final String pathPrefix;

@@ -23,7 +23,6 @@ dependencies {
     implementation("org.apache.jena:jena-arq:$jenaVersion")
     implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
-    implementation("org.trellisldp:trellis-id:$trellisVersion")
     implementation("org.trellisldp:trellis-vocabulary:$trellisVersion")
 
     testImplementation("org.apache.commons:commons-text:$commonsTextVersion")
