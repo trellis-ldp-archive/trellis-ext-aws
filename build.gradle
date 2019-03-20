@@ -30,7 +30,7 @@ ext {
     snakeyamlVersion = '1.24'
 
     /* Databases */
-    mysqlVersion = '8.0.14'
+    mysqlVersion = '8.0.15'
     postgresVersion = '42.2.5'
 
     /* Testing */
@@ -40,7 +40,7 @@ ext {
     checkstyleVersion = '8.12'
     commonsIoVersion = '2.6'
     commonsTextVersion = '1.6'
-    h2Version = '1.4.197'
+    h2Version = '1.4.199'
     jacocoVersion = '0.8.2'
     jaxbVersion = '2.3.1'
     jerseyVersion = '2.27'
