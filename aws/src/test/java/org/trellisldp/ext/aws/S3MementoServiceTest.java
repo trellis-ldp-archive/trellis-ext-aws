@@ -48,7 +48,7 @@ import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.Quad;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.text.RandomStringGenerator;
-import org.apache.tamaya.ConfigurationProvider;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.trellisldp.api.BinaryMetadata;
@@ -71,7 +71,7 @@ public class S3MementoServiceTest {
     @AfterAll
     public static void tearDown() throws Exception {
         final AmazonS3 client = defaultClient();
-        final String bucket = ConfigurationProvider.getConfiguration().get(S3MementoService.CONFIG_MEMENTO_BUCKET);
+        final String bucket = ConfigProvider.getConfig().getValue(S3MementoService.CONFIG_MEMENTO_BUCKET, String.class);
         client.listObjects(bucket, "mementos/" + base).getObjectSummaries().stream()
             .map(S3ObjectSummary::getKey).forEach(key -> client.deleteObject(bucket, key));
     }

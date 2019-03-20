@@ -10,11 +10,11 @@ dependencies {
     api("org.trellisldp:trellis-api:$trellisVersion")
     api("com.amazonaws:aws-java-sdk-lambda:$awsVersion")
 
-    implementation("org.jdbi:jdbi3-core:$jdbiVersion")
     implementation("com.amazonaws.serverless:aws-serverless-java-container-jersey:$awsJerseyVersion")
     implementation("commons-codec:commons-codec:$commonsCodecVersion")
-    implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
-    implementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
+    implementation("io.smallrye:smallrye-config:$smallryeVersion")
+    implementation("org.eclipse.microprofile.config:microprofile-config-api:$microprofileConfigVersion")
+    implementation("org.jdbi:jdbi3-core:$jdbiVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.trellisldp:trellis-agent:$trellisVersion")
     implementation("org.trellisldp:trellis-audit:$trellisVersion")
@@ -49,7 +49,7 @@ test {
     systemProperty "trellis.s3.binary.bucket", System.getenv("AWS_TEST_BUCKET") ?: "test.trellisldp.org"
     systemProperty "trellis.sns.topic", System.getenv("AWS_TEST_TOPIC")
     systemProperty "trellis.jdbc.url", System.getenv("AWS_RDS_URL") ?: ""
-    systemProperty "trellis.jdbc.username", System.getenv("AWS_RDS_USERNAME")
-    systemProperty "trellis.jdbc.password", System.getenv("AWS_JDBC_PASSWORD")
+    systemProperty "trellis.jdbc.username", System.getenv("AWS_RDS_USERNAME") ?: ""
+    systemProperty "trellis.jdbc.password", System.getenv("AWS_RDS_PASSWORD") ?: ""
 }
 

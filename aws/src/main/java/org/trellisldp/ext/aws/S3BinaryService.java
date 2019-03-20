@@ -15,23 +15,11 @@ package org.trellisldp.ext.aws;
 
 import static com.amazonaws.services.s3.AmazonS3ClientBuilder.defaultClient;
 import static java.nio.file.StandardOpenOption.WRITE;
-import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
-import static java.util.stream.Collectors.toSet;
-import static org.apache.commons.codec.digest.DigestUtils.updateDigest;
-import static org.apache.commons.codec.digest.MessageDigestAlgorithms.MD2;
-import static org.apache.commons.codec.digest.MessageDigestAlgorithms.MD5;
-import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA3_256;
-import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA3_384;
-import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA3_512;
-import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_1;
-import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_256;
-import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_384;
-import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_512;
-import static org.apache.tamaya.ConfigurationProvider.getConfiguration;
+import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -43,13 +31,11 @@ import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.MessageDigest;
-import java.util.Set;
 import java.util.concurrent.CompletionStage;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.tamaya.Configuration;
+import org.eclipse.microprofile.config.Config;
 import org.trellisldp.api.Binary;
 import org.trellisldp.api.BinaryMetadata;
 import org.trellisldp.api.BinaryService;
@@ -66,10 +52,6 @@ public class S3BinaryService implements BinaryService {
     public static final String CONFIG_BINARY_PATH_PREFIX = "trellis.s3.binary.path.prefix";
 
     private static final String PREFIX = "s3://";
-    private static final String SHA = "SHA";
-    private static final Set<String> algorithms = asList(MD5, MD2, SHA, SHA_1, SHA_256, SHA_384, SHA_512,
-            SHA3_256, SHA3_384, SHA3_512).stream()
-        .collect(toSet());
 
     private final IdentifierService idService = new DefaultIdentifierService();
     private final AmazonS3 client;
@@ -80,11 +62,12 @@ public class S3BinaryService implements BinaryService {
      * Create an S3-based binary service.
      */
     public S3BinaryService() {
-        this(defaultClient(), getConfiguration());
+        this(defaultClient(), getConfig());
     }
 
-    private S3BinaryService(final AmazonS3 client, final Configuration config) {
-        this(client, config.get(CONFIG_BINARY_BUCKET), config.get(CONFIG_BINARY_PATH_PREFIX));
+    private S3BinaryService(final AmazonS3 client, final Config config) {
+        this(client, config.getValue(CONFIG_BINARY_BUCKET, String.class),
+                config.getOptionalValue(CONFIG_BINARY_PATH_PREFIX, String.class).orElse(""));
     }
 
     /**
@@ -121,16 +104,6 @@ public class S3BinaryService implements BinaryService {
     }
 
     @Override
-    public CompletionStage<MessageDigest> calculateDigest(final IRI identifier, final MessageDigest algorithm) {
-        return supplyAsync(() -> computeDigest(bucketName, getKey(identifier), algorithm));
-    }
-
-    @Override
-    public Set<String> supportedAlgorithms() {
-        return algorithms;
-    }
-
-    @Override
     public String generateIdentifier() {
         return idService.getSupplier(PREFIX).get();
     }
@@ -149,14 +122,6 @@ public class S3BinaryService implements BinaryService {
             client.putObject(req);
         } finally {
             Files.delete(path);
-        }
-    }
-
-    private MessageDigest computeDigest(final String bucket, final String key, final MessageDigest algorithm) {
-        try (final InputStream input = client.getObject(bucket, key).getObjectContent()) {
-            return updateDigest(algorithm, input);
-        } catch (final IOException ex) {
-            throw new UncheckedIOException("Error computing digest", ex);
         }
     }
 

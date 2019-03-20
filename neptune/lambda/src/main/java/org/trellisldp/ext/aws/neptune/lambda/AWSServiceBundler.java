@@ -14,7 +14,7 @@
 package org.trellisldp.ext.aws.neptune.lambda;
 
 import static org.apache.jena.rdfconnection.RDFConnectionFactory.connect;
-import static org.apache.tamaya.ConfigurationProvider.getConfiguration;
+import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.trellisldp.agent.SimpleAgentService;
@@ -47,7 +47,7 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
      */
     public AWSServiceBundler() {
         super();
-        final RDFConnection rdfConnection = connect(getConfiguration().get(TRELLIS_NEPTUNE_URL));
+        final RDFConnection rdfConnection = connect(getConfig().getValue(TRELLIS_NEPTUNE_URL, String.class));
         final NamespaceService nsService = new SimpleNamespaceService();
 
         agentService = new SimpleAgentService();

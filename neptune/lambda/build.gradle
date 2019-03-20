@@ -12,10 +12,10 @@ dependencies {
 
     implementation("com.amazonaws.serverless:aws-serverless-java-container-jersey:$awsJerseyVersion")
     implementation("commons-codec:commons-codec:$commonsCodecVersion")
+    implementation("io.smallrye:smallrye-config:$smallryeVersion")
     implementation("org.apache.jena:jena-arq:$jenaVersion")
     implementation("org.apache.jena:jena-rdfconnection:$jenaVersion")
-    implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
-    implementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
+    implementation("org.eclipse.microprofile.config:microprofile-config-api:$microprofileConfigVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.trellisldp:trellis-agent:$trellisVersion")
     implementation("org.trellisldp:trellis-audit:$trellisVersion")
@@ -42,5 +42,6 @@ test {
     systemProperty 'trellis.neptune.url', "http://example.com"
     systemProperty "trellis.s3.memento.bucket", System.getenv("AWS_TEST_BUCKET") ?: "test.trellisldp.org"
     systemProperty "trellis.s3.binary.bucket", System.getenv("AWS_TEST_BUCKET") ?: "test.trellisldp.org"
+    systemProperty "trellis.sns.topic", System.getenv("AWS_TEST_TOPIC") ?: "test-topic"
 }
 

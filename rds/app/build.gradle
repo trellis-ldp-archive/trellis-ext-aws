@@ -13,12 +13,13 @@ dependencies {
     compile("io.dropwizard:dropwizard-jdbi3:$dropwizardVersion")
     compile("io.dropwizard:dropwizard-metrics:$dropwizardVersion")
     compile("io.dropwizard:dropwizard-migrations:$dropwizardVersion")
+    compile("io.smallrye:smallrye-config:$smallryeVersion")
     compile("org.apache.commons:commons-rdf-jena:$commonsRdfVersion") {
         exclude group: 'org.apache.jena', module: 'jena-osgi'
         exclude group: 'org.apache.servicemix.bundles', module: 'org.apache.servicemix.bundles.xerces'
     }
     compile("org.apache.jena:jena-arq:$jenaVersion")
-    compile("org.apache.tamaya:tamaya-core:$tamayaVersion")
+    compile("org.eclipse.microprofile.config:microprofile-config-api:$microprofileConfigVersion")
     compile("org.slf4j:slf4j-api:$slf4jVersion")
 
     compile("mysql:mysql-connector-java:$mysqlVersion")
@@ -68,6 +69,6 @@ jar {
 test {
     systemProperty "trellis.s3.memento.bucket", System.getenv("AWS_TEST_BUCKET") ?: "test.trellisldp.org"
     systemProperty "trellis.s3.binary.bucket", System.getenv("AWS_TEST_BUCKET") ?: "test.trellisldp.org"
-    systemProperty "trellis.sns.topic", System.getenv("AWS_TEST_TOPIC")
+    systemProperty "trellis.sns.topic", System.getenv("AWS_TEST_TOPIC") ?: "test-topic"
 }
 

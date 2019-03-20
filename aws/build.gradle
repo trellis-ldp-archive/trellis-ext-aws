@@ -21,12 +21,12 @@ dependencies {
         exclude group: 'org.apache.servicemix.bundles', module: 'org.apache.servicemix.bundles.xerces'
     }
     implementation("org.apache.jena:jena-arq:$jenaVersion")
-    implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
+    implementation("org.eclipse.microprofile.config:microprofile-config-api:$microprofileConfigVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.trellisldp:trellis-vocabulary:$trellisVersion")
 
     testImplementation("org.apache.commons:commons-text:$commonsTextVersion")
-    testImplementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
+    testImplementation("io.smallrye:smallrye-config:$smallryeVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("org.trellisldp:trellis-event-serialization:$trellisVersion")
 

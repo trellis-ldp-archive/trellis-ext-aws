@@ -15,7 +15,7 @@ package org.trellisldp.ext.aws.rds.app;
 
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 import static java.io.File.separator;
-import static org.apache.tamaya.ConfigurationProvider.getConfiguration;
+import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 import static org.junit.jupiter.api.condition.OS.WINDOWS;
 import static org.trellisldp.ext.aws.S3BinaryService.CONFIG_BINARY_BUCKET;
 import static org.trellisldp.ext.aws.S3BinaryService.CONFIG_BINARY_PATH_PREFIX;
@@ -77,7 +77,7 @@ public class TrellisLdpEmbeddedPgsqlTest extends AbstractLdpTests {
         System.clearProperty(CONFIG_BINARY_PATH_PREFIX);
         PG_APP.after();
         pg.close();
-        TestUtils.cleanupS3(getConfiguration().get(CONFIG_MEMENTO_BUCKET), mementos);
-        TestUtils.cleanupS3(getConfiguration().get(CONFIG_BINARY_BUCKET), binaries);
+        TestUtils.cleanupS3(getConfig().getValue(CONFIG_MEMENTO_BUCKET, String.class), mementos);
+        TestUtils.cleanupS3(getConfig().getValue(CONFIG_BINARY_BUCKET, String.class), binaries);
     }
 }

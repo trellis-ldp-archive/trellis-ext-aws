@@ -23,7 +23,7 @@ import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.stream.Stream.of;
 import static org.apache.jena.riot.Lang.NQUADS;
-import static org.apache.tamaya.ConfigurationProvider.getConfiguration;
+import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.trellisldp.api.Resource.SpecialResources.MISSING_RESOURCE;
 import static org.trellisldp.api.TrellisUtils.TRELLIS_DATA_PREFIX;
@@ -53,7 +53,7 @@ import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.Quad;
 import org.apache.commons.rdf.jena.JenaRDF;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.tamaya.Configuration;
+import org.eclipse.microprofile.config.Config;
 import org.slf4j.Logger;
 import org.trellisldp.api.MementoService;
 import org.trellisldp.api.Resource;
@@ -78,11 +78,12 @@ public class S3MementoService implements MementoService {
      * Create an S3-based memento service.
      */
     public S3MementoService() {
-        this(defaultClient(), getConfiguration());
+        this(defaultClient(), getConfig());
     }
 
-    private S3MementoService(final AmazonS3 client, final Configuration config) {
-        this(client, config.get(CONFIG_MEMENTO_BUCKET), config.get(CONFIG_MEMENTO_PATH_PREFIX));
+    private S3MementoService(final AmazonS3 client, final Config config) {
+        this(client, config.getValue(CONFIG_MEMENTO_BUCKET, String.class),
+                config.getOptionalValue(CONFIG_MEMENTO_PATH_PREFIX, String.class).orElse(""));
     }
 
     /**

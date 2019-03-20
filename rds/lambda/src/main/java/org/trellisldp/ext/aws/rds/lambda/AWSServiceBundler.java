@@ -13,9 +13,9 @@
  */
 package org.trellisldp.ext.aws.rds.lambda;
 
-import static org.apache.tamaya.ConfigurationProvider.getConfiguration;
+import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 
-import org.apache.tamaya.Configuration;
+import org.eclipse.microprofile.config.Config;
 import org.jdbi.v3.core.Jdbi;
 import org.trellisldp.agent.SimpleAgentService;
 import org.trellisldp.api.AgentService;
@@ -48,9 +48,10 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
      */
     public AWSServiceBundler() {
         super();
-        final Configuration config = getConfiguration();
-        final Jdbi jdbi = Jdbi.create(config.get("trellis.jdbc.url"), config.get("trellis.jdbc.username"),
-                config.get("trellis.jdbc.password"));
+        final Config config = getConfig();
+        final Jdbi jdbi = Jdbi.create(config.getValue("trellis.jdbc.url", String.class),
+                config.getValue("trellis.jdbc.username", String.class),
+                config.getValue("trellis.jdbc.password", String.class));
         final NamespaceService nsService = new DBNamespaceService(jdbi);
         agentService = new SimpleAgentService();
         ioService = new JenaIOService(nsService, new HtmlSerializer(nsService));

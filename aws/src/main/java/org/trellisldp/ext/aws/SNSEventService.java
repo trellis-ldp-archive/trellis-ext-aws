@@ -17,7 +17,7 @@ import static com.amazonaws.services.sns.AmazonSNSClientBuilder.defaultClient;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.of;
 import static java.util.ServiceLoader.load;
-import static org.apache.tamaya.ConfigurationProvider.getConfiguration;
+import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.amazonaws.services.sns.AmazonSNS;
@@ -51,7 +51,7 @@ public class SNSEventService implements EventService {
      * Cretae an SNS-bases notification service.
      */
     public SNSEventService() {
-        this(defaultClient(), getConfiguration().get(TRELLIS_SNS_TOPIC));
+        this(defaultClient(), getConfig().getValue(TRELLIS_SNS_TOPIC, String.class));
     }
 
     /**
@@ -61,7 +61,7 @@ public class SNSEventService implements EventService {
      */
     public SNSEventService(final AmazonSNS client, final String topic) {
         this.sns = requireNonNull(client, "the SNS client may not be null!");
-        this.topic = topic;
+        this.topic = requireNonNull(topic, "the SNS topic may not be null!");
     }
 
     @Override
