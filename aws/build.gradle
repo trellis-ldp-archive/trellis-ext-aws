@@ -13,7 +13,6 @@ dependencies {
     api("com.amazonaws:aws-java-sdk-s3:$awsVersion")
     api("com.amazonaws:aws-java-sdk-sns:$awsVersion")
 
-    implementation("commons-codec:commons-codec:$commonsCodecVersion")
     implementation("commons-io:commons-io:$commonsIoVersion")
     implementation("org.apache.commons:commons-compress:$commonsCompressVersion")
     implementation("org.apache.commons:commons-rdf-jena:$commonsRdfVersion") {

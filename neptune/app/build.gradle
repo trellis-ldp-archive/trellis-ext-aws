@@ -17,8 +17,6 @@ dependencies {
     compile("org.eclipse.microprofile.config:microprofile-config-api:$microprofileConfigVersion")
     compile("org.slf4j:slf4j-api:$slf4jVersion")
 
-    compile("commons-codec:commons-codec:$commonsCodecVersion")
-    compile("org.slf4j:slf4j-api:$slf4jVersion")
     compile("org.trellisldp:trellis-agent:$trellisVersion")
     compile("org.trellisldp:trellis-api:$trellisVersion")
     compile("org.trellisldp:trellis-audit:$trellisVersion")
