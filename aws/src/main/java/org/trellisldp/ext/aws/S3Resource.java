@@ -37,6 +37,7 @@ import org.apache.jena.riot.RDFParser;
 import org.trellisldp.api.BinaryMetadata;
 import org.trellisldp.api.Resource;
 import org.trellisldp.api.RuntimeTrellisException;
+import org.trellisldp.vocabulary.LDP;
 
 /**
  * An S3-based resource.
@@ -84,18 +85,14 @@ public class S3Resource implements Resource {
 
     @Override
     public Instant getModified() {
-        if (metadata.getUserMetaDataOf(MODIFIED) != null) {
-            return Instant.parse(metadata.getUserMetaDataOf(MODIFIED));
-        }
-        return null;
+        final String modified = metadata.getUserMetaDataOf(MODIFIED);
+        return modified != null ? Instant.parse(modified) : Instant.now();
     }
 
     @Override
     public IRI getInteractionModel() {
-        if (metadata.getUserMetaDataOf(INTERACTION_MODEL) != null) {
-            return rdf.createIRI(metadata.getUserMetaDataOf(INTERACTION_MODEL));
-        }
-        return null;
+        final String model = metadata.getUserMetaDataOf(INTERACTION_MODEL);
+        return model != null ? rdf.createIRI(model) : LDP.Resource;
     }
 
     @Override
