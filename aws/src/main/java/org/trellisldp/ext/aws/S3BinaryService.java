@@ -16,7 +16,6 @@ package org.trellisldp.ext.aws;
 import static com.amazonaws.services.s3.AmazonS3ClientBuilder.defaultClient;
 import static java.nio.file.StandardOpenOption.WRITE;
 import static java.util.Objects.requireNonNull;
-import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
@@ -79,7 +78,7 @@ public class S3BinaryService implements BinaryService {
     public S3BinaryService(final AmazonS3 client, final String bucketName, final String pathPrefix) {
         this.client = requireNonNull(client, "client may not be null!");
         this.bucketName = requireNonNull(bucketName, "bucket name may not be null!");
-        this.pathPrefix = ofNullable(pathPrefix).orElse("");
+        this.pathPrefix = pathPrefix != null ? pathPrefix : "";
     }
 
     @Override

@@ -18,7 +18,6 @@ import static java.io.File.createTempFile;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.unmodifiableSortedSet;
 import static java.util.Objects.requireNonNull;
-import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.stream.Stream.of;
@@ -95,7 +94,7 @@ public class S3MementoService implements MementoService {
     public S3MementoService(final AmazonS3 client, final String bucketName, final String pathPrefix) {
         this.client = requireNonNull(client, "S3 client may not be null!");
         this.bucketName = requireNonNull(bucketName, "AWS Bucket may not be null!");
-        this.pathPrefix = ofNullable(pathPrefix).orElse("");
+        this.pathPrefix = pathPrefix != null ? pathPrefix : "";
     }
 
     @Override

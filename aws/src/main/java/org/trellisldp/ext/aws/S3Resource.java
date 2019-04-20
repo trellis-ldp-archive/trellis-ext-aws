@@ -14,7 +14,6 @@
 package org.trellisldp.ext.aws;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.apache.jena.query.DatasetFactory.create;
 import static org.apache.jena.riot.Lang.NQUADS;
@@ -79,19 +78,24 @@ public class S3Resource implements Resource {
 
     @Override
     public IRI getIdentifier() {
-        final String key = of(prefix).filter(req.getKey()::startsWith).map(String::length).map(req.getKey()::substring)
-                .orElseGet(req::getKey);
+        final String key = req.getKey().startsWith(prefix) ? req.getKey().substring(prefix.length()) : req.getKey();
         return rdf.createIRI(TRELLIS_DATA_PREFIX + key.split("\\?version=")[0]);
     }
 
     @Override
     public Instant getModified() {
-        return ofNullable(metadata.getUserMetaDataOf(MODIFIED)).map(Instant::parse).orElse(null);
+        if (metadata.getUserMetaDataOf(MODIFIED) != null) {
+            return Instant.parse(metadata.getUserMetaDataOf(MODIFIED));
+        }
+        return null;
     }
 
     @Override
     public IRI getInteractionModel() {
-        return ofNullable(metadata.getUserMetaDataOf(INTERACTION_MODEL)).map(rdf::createIRI).orElse(null);
+        if (metadata.getUserMetaDataOf(INTERACTION_MODEL) != null) {
+            return rdf.createIRI(metadata.getUserMetaDataOf(INTERACTION_MODEL));
+        }
+        return null;
     }
 
     @Override
