@@ -29,20 +29,20 @@ jobs:
         # JDK 8
         - name: "Java 8"
           stage: test
-          jdk: oraclejdk8
+          jdk: openjdk8
           script: ./gradlew check install jacocoRootReport --scan
           after_success: ./gradlew coveralls sonarqube
 
         # JDK 11
         - name: "Java 11"
           stage: test
-          jdk: oraclejdk11
+          jdk: openjdk11
           script: ./gradlew check install
 
         # deploy to Sonatype
         - name: "Publish to Sonatype"
           stage: deploy
-          jdk: oraclejdk8
+          jdk: openjdk8
           env: JOB=sonatype
           if: branch = trellis-ext-aws-0.1.x AND type = push
           # Only automate the publication of SNAPSHOTS
@@ -51,7 +51,7 @@ jobs:
         # deploy to Docker hub
         - name: "Publish to Docker hub"
           stage: deploy
-          jdk: oraclejdk8
+          jdk: openjdk8
           env: JOB=docker
           if: branch = trellis-ext-aws-0.1.x AND type = push
           before_script: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
@@ -60,7 +60,7 @@ jobs:
         # deploy to AWS
         - name: "Publish JavaDocs"
           stage: deploy
-          jdk: oraclejdk8
+          jdk: openjdk8
           env: JOB=aws
           if: branch = trellis-ext-aws-0.1.x AND type = push
           script: ./gradlew apidocs
