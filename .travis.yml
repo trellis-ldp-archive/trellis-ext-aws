@@ -7,6 +7,9 @@ addons:
   sonarcloud:
     organization: trellis-ldp
 
+services:
+  - postgresql
+
 stages:
   - test
   - deploy
