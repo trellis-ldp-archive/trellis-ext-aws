@@ -47,7 +47,7 @@ jar {
 test {
     systemProperty "trellis.s3.memento.bucket", System.getenv("AWS_TEST_BUCKET") ?: "test.trellisldp.org"
     systemProperty "trellis.s3.binary.bucket", System.getenv("AWS_TEST_BUCKET") ?: "test.trellisldp.org"
-    systemProperty "trellis.sns.topic", System.getenv("AWS_TEST_TOPIC")
+    systemProperty "trellis.sns.topic", System.getenv("AWS_TEST_TOPIC") ?: ""
     systemProperty "trellis.jdbc.url", System.getenv("AWS_RDS_URL") ?: ""
     systemProperty "trellis.jdbc.username", System.getenv("AWS_RDS_USERNAME")
     systemProperty "trellis.jdbc.password", System.getenv("AWS_JDBC_PASSWORD")
