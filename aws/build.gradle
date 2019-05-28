@@ -36,6 +36,6 @@ test {
     systemProperty "trellis.ns-test", "http://example.com/test/"
     systemProperty "trellis.s3.memento.bucket", System.getenv("AWS_TEST_BUCKET") ?: "test.trellisldp.org"
     systemProperty "trellis.s3.binary.bucket", System.getenv("AWS_TEST_BUCKET") ?: "test.trellisldp.org"
-    systemProperty "trellis.sns.topic", System.getenv("AWS_TEST_TOPIC")
+    systemProperty "trellis.sns.topic", System.getenv("AWS_TEST_TOPIC") ?: "arn:aws:sns:us-east-1:0000000000:TrellisTest"
 }
 

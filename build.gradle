@@ -26,7 +26,7 @@ ext {
     microprofileConfigVersion = '1.3'
     trellisVersion = '0.9.0-SNAPSHOT'
     trellisDbVersion = '0.3.0-SNAPSHOT'
-    smallryeVersion = '1.3.5'
+    smallryeVersion = '1.3.7'
     snakeyamlVersion = '1.24'
 
     /* Databases */
