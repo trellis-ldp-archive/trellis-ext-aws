@@ -25,8 +25,8 @@ ext {
     jenaVersion = '3.11.0'
     jdbiVersion = '3.8.2'
     tamayaVersion = '0.3-incubating'
-    trellisVersion = '0.8.3-SNAPSHOT'
-    trellisDbVersion = '0.2.3-SNAPSHOT'
+    trellisVersion = '0.8.3'
+    trellisDbVersion = '0.2.3'
     snakeyamlVersion = '1.24'
 
     /* Databases */
