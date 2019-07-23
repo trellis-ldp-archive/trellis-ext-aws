@@ -58,7 +58,7 @@ public class TrellisServiceBundlerTest {
         assertNotNull(bundler.getMementoService(), "Missing memento service!");
         assertNotNull(bundler.getResourceService(), "Missing resource service!");
         assertEquals(bundler.getResourceService(), bundler.getAuditService(), "Incorrect audit/resource services!");
-        assertFalse(bundler.getConstraintServices().isEmpty(), "Missing constraint services");
+        assertTrue(bundler.getConstraintServices().iterator().hasNext(), "Missing constraint services");
         assertNotNull(bundler.getTimemapGenerator(), "Missing timemap generator!");
         assertNotNull(bundler.getEtagGenerator(), "Missing etag generator!");
 
