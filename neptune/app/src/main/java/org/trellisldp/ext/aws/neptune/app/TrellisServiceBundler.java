@@ -14,6 +14,7 @@
 package org.trellisldp.ext.aws.neptune.app;
 
 import static com.google.common.cache.CacheBuilder.newBuilder;
+import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.HOURS;
 import static org.apache.jena.rdfconnection.RDFConnectionFactory.connect;
 
@@ -21,16 +22,22 @@ import com.google.common.cache.Cache;
 
 import io.dropwizard.setup.Environment;
 
+import java.util.List;
+
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.trellisldp.agent.SimpleAgentService;
 import org.trellisldp.api.AgentService;
 import org.trellisldp.api.AuditService;
+import org.trellisldp.api.ConstraintService;
 import org.trellisldp.api.IOService;
 import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.RDFaWriterService;
 import org.trellisldp.api.ResourceService;
 import org.trellisldp.app.TrellisCache;
+import org.trellisldp.constraint.LdpConstraints;
 import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
+import org.trellisldp.http.core.EtagGenerator;
+import org.trellisldp.http.core.TimemapGenerator;
 import org.trellisldp.io.JenaIOService;
 import org.trellisldp.namespaces.NamespacesJsonContext;
 import org.trellisldp.rdfa.HtmlSerializer;
@@ -49,6 +56,9 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
     private final TriplestoreResourceService resourceService;
     private final AgentService agentService;
     private final IOService ioService;
+    private List<ConstraintService> constraintServices;
+    private TimemapGenerator timemapGenerator;
+    private EtagGenerator etagGenerator;
 
     /**
      * Create a new application service bundler.
@@ -60,6 +70,9 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
         agentService = new SimpleAgentService();
         ioService = buildIoService(config);
         auditService = resourceService = buildResourceService(config, environment);
+        constraintServices = singletonList(new LdpConstraints());
+        timemapGenerator = new TimemapGenerator() { };
+        etagGenerator = new EtagGenerator() { };
     }
 
     @Override
@@ -80,6 +93,21 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
     @Override
     public IOService getIOService() {
         return ioService;
+    }
+
+    @Override
+    public Iterable<ConstraintService> getConstraintServices() {
+        return constraintServices;
+    }
+
+    @Override
+    public TimemapGenerator getTimemapGenerator() {
+        return timemapGenerator;
+    }
+
+    @Override
+    public EtagGenerator getEtagGenerator() {
+        return etagGenerator;
     }
 
     private static TriplestoreResourceService buildResourceService(final AppConfiguration config,

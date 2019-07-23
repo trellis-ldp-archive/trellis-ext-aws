@@ -13,22 +13,29 @@
  */
 package org.trellisldp.ext.aws.rds.lambda;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
+
+import java.util.List;
 
 import org.eclipse.microprofile.config.Config;
 import org.jdbi.v3.core.Jdbi;
 import org.trellisldp.agent.SimpleAgentService;
 import org.trellisldp.api.AgentService;
 import org.trellisldp.api.AuditService;
+import org.trellisldp.api.ConstraintService;
 import org.trellisldp.api.IOService;
 import org.trellisldp.api.MementoService;
 import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.ResourceService;
+import org.trellisldp.constraint.LdpConstraints;
 import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
 import org.trellisldp.ext.aws.S3MementoService;
 import org.trellisldp.ext.db.DBNamespaceService;
 import org.trellisldp.ext.db.DBResourceService;
 import org.trellisldp.ext.db.DBWrappedMementoService;
+import org.trellisldp.http.core.EtagGenerator;
+import org.trellisldp.http.core.TimemapGenerator;
 import org.trellisldp.io.JenaIOService;
 import org.trellisldp.rdfa.HtmlSerializer;
 
@@ -42,6 +49,9 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
     private IOService ioService;
     private MementoService mementoService;
     private DBResourceService resourceService;
+    private List<ConstraintService> constraintServices;
+    private TimemapGenerator timemapGenerator;
+    private EtagGenerator etagGenerator;
 
     /**
      * Get an AWS-based service bundler using Newton.
@@ -57,6 +67,9 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
         ioService = new JenaIOService(nsService, new HtmlSerializer(nsService));
         mementoService = new DBWrappedMementoService(jdbi, new S3MementoService());
         auditService = resourceService = new DBResourceService(jdbi);
+        constraintServices = singletonList(new LdpConstraints());
+        timemapGenerator = new TimemapGenerator() { };
+        etagGenerator = new EtagGenerator() { };
     }
 
     @Override
@@ -82,5 +95,20 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
     @Override
     public IOService getIOService() {
         return ioService;
+    }
+
+    @Override
+    public Iterable<ConstraintService> getConstraintServices() {
+        return constraintServices;
+    }
+
+    @Override
+    public TimemapGenerator getTimemapGenerator() {
+        return timemapGenerator;
+    }
+
+    @Override
+    public EtagGenerator getEtagGenerator() {
+        return etagGenerator;
     }
 }

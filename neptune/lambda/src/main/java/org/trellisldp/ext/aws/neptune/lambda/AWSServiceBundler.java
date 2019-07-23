@@ -13,18 +13,25 @@
  */
 package org.trellisldp.ext.aws.neptune.lambda;
 
+import static java.util.Collections.singletonList;
 import static org.apache.jena.rdfconnection.RDFConnectionFactory.connect;
 import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
+
+import java.util.List;
 
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.trellisldp.agent.SimpleAgentService;
 import org.trellisldp.api.AgentService;
 import org.trellisldp.api.AuditService;
+import org.trellisldp.api.ConstraintService;
 import org.trellisldp.api.IOService;
 import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.ResourceService;
+import org.trellisldp.constraint.LdpConstraints;
 import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
 import org.trellisldp.ext.aws.SimpleNamespaceService;
+import org.trellisldp.http.core.EtagGenerator;
+import org.trellisldp.http.core.TimemapGenerator;
 import org.trellisldp.io.JenaIOService;
 import org.trellisldp.rdfa.HtmlSerializer;
 import org.trellisldp.triplestore.TriplestoreResourceService;
@@ -41,6 +48,9 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
     private AuditService auditService;
     private IOService ioService;
     private TriplestoreResourceService resourceService;
+    private List<ConstraintService> constraintServices;
+    private TimemapGenerator timemapGenerator;
+    private EtagGenerator etagGenerator;
 
     /**
      * Get an AWS-based service bundler using Newton.
@@ -53,6 +63,9 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
         agentService = new SimpleAgentService();
         ioService = new JenaIOService(nsService, new HtmlSerializer(nsService));
         auditService = resourceService = new TriplestoreResourceService(rdfConnection);
+        constraintServices = singletonList(new LdpConstraints());
+        timemapGenerator = new TimemapGenerator() { };
+        etagGenerator = new EtagGenerator() { };
     }
 
     @Override
@@ -73,5 +86,20 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
     @Override
     public IOService getIOService() {
         return ioService;
+    }
+
+    @Override
+    public Iterable<ConstraintService> getConstraintServices() {
+        return constraintServices;
+    }
+
+    @Override
+    public TimemapGenerator getTimemapGenerator() {
+        return timemapGenerator;
+    }
+
+    @Override
+    public EtagGenerator getEtagGenerator() {
+        return etagGenerator;
     }
 }

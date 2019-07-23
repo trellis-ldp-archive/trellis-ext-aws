@@ -13,15 +13,22 @@
  */
 package org.trellisldp.ext.aws;
 
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.trellisldp.api.AgentService;
 import org.trellisldp.api.AuditService;
+import org.trellisldp.api.ConstraintService;
 import org.trellisldp.api.IOService;
 import org.trellisldp.api.ResourceService;
+import org.trellisldp.constraint.LdpConstraints;
+import org.trellisldp.http.core.EtagGenerator;
 import org.trellisldp.http.core.ServiceBundler;
+import org.trellisldp.http.core.TimemapGenerator;
 
 public class AbstractAWSServiceBundlerTest {
 
@@ -31,6 +38,9 @@ public class AbstractAWSServiceBundlerTest {
         private final ResourceService resourceService;
         private final AgentService agentService;
         private final IOService ioService;
+        private final List<ConstraintService> constraintServices;
+        private final TimemapGenerator timemapGenerator;
+        private final EtagGenerator etagGenerator;
 
         public TestServiceBundler(final AuditService auditService, final ResourceService resourceService,
                 final IOService ioService, final AgentService agentService) {
@@ -39,6 +49,9 @@ public class AbstractAWSServiceBundlerTest {
             this.agentService = agentService;
             this.auditService = auditService;
             this.resourceService = resourceService;
+            this.constraintServices = singletonList(new LdpConstraints());
+            this.etagGenerator = new EtagGenerator() { };
+            this.timemapGenerator = new TimemapGenerator() { };
         }
 
         @Override
@@ -59,6 +72,21 @@ public class AbstractAWSServiceBundlerTest {
         @Override
         public IOService getIOService() {
             return ioService;
+        }
+
+        @Override
+        public Iterable<ConstraintService> getConstraintServices() {
+            return constraintServices;
+        }
+
+        @Override
+        public TimemapGenerator getTimemapGenerator() {
+            return timemapGenerator;
+        }
+
+        @Override
+        public EtagGenerator getEtagGenerator() {
+            return etagGenerator;
         }
     }
 
