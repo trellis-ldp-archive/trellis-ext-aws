@@ -13,8 +13,7 @@
  */
 package org.trellisldp.ext.aws.rds.lambda;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 import org.trellisldp.http.core.ServiceBundler;
@@ -33,5 +32,8 @@ public class AWSServiceBundlerTest {
         assertNotNull(bundler.getIOService(), "Missing I/O service!");
         assertNotNull(bundler.getResourceService(), "Missing resource service!");
         assertNotNull(bundler.getAgentService(), "Missing agent service!");
+        assertFalse(bundler.getConstraintServices().isEmpty(), "Missing constraint services!");
+        assertNotNull(bundler.getTimemapGenerator(), "Missing timemap generator!");
+        assertNotNull(bundler.getEtagGenerator(), "Missing etag generator!");
     }
 }

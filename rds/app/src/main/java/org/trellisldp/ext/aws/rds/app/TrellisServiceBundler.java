@@ -108,8 +108,8 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
     }
 
     @Override
-    public Iterable<ConstraintService> getConstraintServices() {
-        return constraintServices;
+    public EtagGenerator getEtagGenerator() {
+        return etagGenerator;
     }
 
     @Override
@@ -118,8 +118,8 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
     }
 
     @Override
-    public EtagGenerator getEtagGenerator() {
-        return etagGenerator;
+    public Iterable<ConstraintService> getConstraintServices() {
+        return constraintServices;
     }
 
     private static IOService buildIoService(final AppConfiguration config, final Jdbi jdbi) {

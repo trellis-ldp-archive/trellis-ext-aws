@@ -32,5 +32,8 @@ public class AWSServiceBundlerTest {
         assertNotNull(bundler.getIOService(), "Missing I/O service!");
         assertNotNull(bundler.getResourceService(), "Missing resource service!");
         assertNotNull(bundler.getAgentService(), "Missing agent service!");
+        assertNotNull(bundler.getConstraintServices(), "Missing constraint services!");
+        assertNotNull(bundler.getTimemapGenerator(), "Missing timemap generator!");
+        assertNotNull(bundler.getEtagGenerator(), "Missing etag generator!");
     }
 }
