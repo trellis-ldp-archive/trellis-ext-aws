@@ -98,13 +98,13 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
     }
 
     @Override
-    public TimemapGenerator getTimemapGenerator() {
-        return timemapGenerator;
+    public EtagGenerator getEtagGenerator() {
+        return etagGenerator;
     }
 
     @Override
-    public EtagGenerator getEtagGenerator() {
-        return etagGenerator;
+    public TimemapGenerator getTimemapGenerator() {
+        return timemapGenerator;
     }
 
     @Override

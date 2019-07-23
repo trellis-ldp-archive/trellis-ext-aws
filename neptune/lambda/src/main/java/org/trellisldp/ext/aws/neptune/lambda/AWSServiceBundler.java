@@ -89,8 +89,8 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
     }
 
     @Override
-    public TimemapGenerator getTimemapGenerator() {
-        return timemapGenerator;
+    public Iterable<ConstraintService> getConstraintServices() {
+        return constraintServices;
     }
 
     @Override
@@ -99,7 +99,7 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
     }
 
     @Override
-    public Iterable<ConstraintService> getConstraintServices() {
-        return constraintServices;
+    public TimemapGenerator getTimemapGenerator() {
+        return timemapGenerator;
     }
 }
