@@ -31,7 +31,7 @@ import io.dropwizard.setup.Environment;
 import java.io.File;
 
 import org.junit.jupiter.api.Test;
-import org.trellisldp.api.ServiceBundler;
+import org.trellisldp.http.core.ServiceBundler;
 
 public class TrellisServiceBundlerTest {
 

@@ -15,8 +15,8 @@ package org.trellisldp.ext.aws.neptune.app;
 
 import io.dropwizard.setup.Environment;
 
-import org.trellisldp.api.ServiceBundler;
 import org.trellisldp.app.AbstractTrellisApplication;
+import org.trellisldp.http.core.ServiceBundler;
 
 /**
  * A deployable Trellis application.

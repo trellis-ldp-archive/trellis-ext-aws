@@ -16,7 +16,7 @@ package org.trellisldp.ext.aws;
 import org.trellisldp.api.BinaryService;
 import org.trellisldp.api.EventService;
 import org.trellisldp.api.MementoService;
-import org.trellisldp.api.ServiceBundler;
+import org.trellisldp.http.core.ServiceBundler;
 
 /**
  * An AWS-based service bundler for Trellis.

@@ -24,9 +24,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.glassfish.jersey.server.ResourceConfig;
-import org.trellisldp.api.ServiceBundler;
 import org.trellisldp.http.AgentAuthorizationFilter;
 import org.trellisldp.http.TrellisHttpResource;
+import org.trellisldp.http.core.ServiceBundler;
 
 public class TrellisLambdaHandler implements RequestStreamHandler {
 

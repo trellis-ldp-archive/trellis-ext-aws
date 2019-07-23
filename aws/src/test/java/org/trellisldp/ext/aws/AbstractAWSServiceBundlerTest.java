@@ -21,7 +21,7 @@ import org.trellisldp.api.AgentService;
 import org.trellisldp.api.AuditService;
 import org.trellisldp.api.IOService;
 import org.trellisldp.api.ResourceService;
-import org.trellisldp.api.ServiceBundler;
+import org.trellisldp.http.core.ServiceBundler;
 
 public class AbstractAWSServiceBundlerTest {
 
