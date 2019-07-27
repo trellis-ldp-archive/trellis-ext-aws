@@ -36,6 +36,7 @@ import org.trellisldp.api.RDFaWriterService;
 import org.trellisldp.api.ResourceService;
 import org.trellisldp.app.TrellisCache;
 import org.trellisldp.constraint.LdpConstraints;
+import org.trellisldp.event.EventSerializer;
 import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
 import org.trellisldp.ext.aws.S3MementoService;
 import org.trellisldp.ext.db.DBNamespaceService;
@@ -70,7 +71,7 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
      * @param environment the dropwizard environment
      */
     public TrellisServiceBundler(final AppConfiguration config, final Environment environment) {
-        super();
+        super(new EventSerializer());
         final Jdbi jdbi = new JdbiFactory().build(environment, config.getDataSourceFactory(), "trellis");
 
         auditService = resourceService = new DBResourceService(jdbi);

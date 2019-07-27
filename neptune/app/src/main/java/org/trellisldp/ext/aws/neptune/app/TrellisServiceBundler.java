@@ -35,6 +35,7 @@ import org.trellisldp.api.RDFaWriterService;
 import org.trellisldp.api.ResourceService;
 import org.trellisldp.app.TrellisCache;
 import org.trellisldp.constraint.LdpConstraints;
+import org.trellisldp.event.EventSerializer;
 import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
 import org.trellisldp.http.core.EtagGenerator;
 import org.trellisldp.http.core.TimemapGenerator;
@@ -66,7 +67,7 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
      * @param environment the dropwizard environment
      */
     public TrellisServiceBundler(final AppConfiguration config, final Environment environment) {
-        super();
+        super(new EventSerializer());
         agentService = new SimpleAgentService();
         ioService = buildIoService(config);
         auditService = resourceService = buildResourceService(config, environment);

@@ -31,8 +31,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.mockito.Mock;
+import org.trellisldp.api.ActivityStreamService;
 import org.trellisldp.api.Event;
 import org.trellisldp.api.EventService;
+import org.trellisldp.event.EventSerializer;
 import org.trellisldp.vocabulary.AS;
 import org.trellisldp.vocabulary.LDP;
 
@@ -43,6 +45,7 @@ public class SNSEventServiceTest {
     private static final IRI target = rdf.createIRI("http://example.com/resource");
     private static final IRI agent = rdf.createIRI("http://example.com/agent");
     private static final Instant time = now();
+    private static final ActivityStreamService serializer = new EventSerializer();
 
     @Mock
     private Event mockEvent;
@@ -62,14 +65,15 @@ public class SNSEventServiceTest {
     @Test
     @EnabledIfSystemProperty(named = "trellis.sns.topic", matches = "arn:aws:sns:.*")
     public void testEvent() {
-        final EventService svc = new SNSEventService();
+        final EventService svc = new SNSEventService(serializer);
         svc.emit(mockEvent);
         verify(mockEvent).getIdentifier();
     }
 
     @Test
     public void testEventError() {
-        final EventService svc = new SNSEventService(defaultClient(), "arn:aws:sns:us-east-1:12345678:NonExistent");
+        final EventService svc = new SNSEventService(serializer, defaultClient(),
+                "arn:aws:sns:us-east-1:12345678:NonExistent");
         svc.emit(mockEvent);
         verify(mockEvent).getIdentifier();
     }

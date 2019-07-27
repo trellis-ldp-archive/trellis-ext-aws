@@ -28,6 +28,7 @@ import org.trellisldp.api.IOService;
 import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.ResourceService;
 import org.trellisldp.constraint.LdpConstraints;
+import org.trellisldp.event.EventSerializer;
 import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
 import org.trellisldp.ext.aws.SimpleNamespaceService;
 import org.trellisldp.http.core.EtagGenerator;
@@ -56,7 +57,7 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
      * Get an AWS-based service bundler using Newton.
      */
     public AWSServiceBundler() {
-        super();
+        super(new EventSerializer());
         final RDFConnection rdfConnection = connect(getConfig().getValue(TRELLIS_NEPTUNE_URL, String.class));
         final NamespaceService nsService = new SimpleNamespaceService();
 

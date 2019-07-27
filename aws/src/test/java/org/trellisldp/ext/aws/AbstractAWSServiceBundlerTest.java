@@ -26,6 +26,7 @@ import org.trellisldp.api.ConstraintService;
 import org.trellisldp.api.IOService;
 import org.trellisldp.api.ResourceService;
 import org.trellisldp.constraint.LdpConstraints;
+import org.trellisldp.event.EventSerializer;
 import org.trellisldp.http.core.EtagGenerator;
 import org.trellisldp.http.core.ServiceBundler;
 import org.trellisldp.http.core.TimemapGenerator;
@@ -44,7 +45,7 @@ public class AbstractAWSServiceBundlerTest {
 
         public TestServiceBundler(final AuditService auditService, final ResourceService resourceService,
                 final IOService ioService, final AgentService agentService) {
-            super();
+            super(new EventSerializer());
             this.ioService = ioService;
             this.agentService = agentService;
             this.auditService = auditService;

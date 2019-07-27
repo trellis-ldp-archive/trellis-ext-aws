@@ -13,6 +13,7 @@
  */
 package org.trellisldp.ext.aws;
 
+import org.trellisldp.api.ActivityStreamService;
 import org.trellisldp.api.BinaryService;
 import org.trellisldp.api.EventService;
 import org.trellisldp.api.MementoService;
@@ -31,11 +32,12 @@ public abstract class AbstractAWSServiceBundler implements ServiceBundler {
 
     /**
      * Create a new application service bundler.
+     * @param serializer the event serializer
      */
-    public AbstractAWSServiceBundler() {
+    public AbstractAWSServiceBundler(final ActivityStreamService serializer) {
         this.mementoService = new S3MementoService();
         this.binaryService = new S3BinaryService();
-        this.eventService = new SNSEventService();
+        this.eventService = new SNSEventService(serializer);
     }
 
     @Override

@@ -29,6 +29,7 @@ import org.trellisldp.api.MementoService;
 import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.ResourceService;
 import org.trellisldp.constraint.LdpConstraints;
+import org.trellisldp.event.EventSerializer;
 import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
 import org.trellisldp.ext.aws.S3MementoService;
 import org.trellisldp.ext.db.DBNamespaceService;
@@ -57,7 +58,7 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
      * Get an AWS-based service bundler using Newton.
      */
     public AWSServiceBundler() {
-        super();
+        super(new EventSerializer());
         final Config config = getConfig();
         final Jdbi jdbi = Jdbi.create(config.getValue("trellis.jdbc.url", String.class),
                 config.getValue("trellis.jdbc.username", String.class),
