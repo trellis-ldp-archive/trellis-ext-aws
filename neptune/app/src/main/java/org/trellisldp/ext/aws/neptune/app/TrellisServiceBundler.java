@@ -37,6 +37,8 @@ import org.trellisldp.app.TrellisCache;
 import org.trellisldp.constraint.LdpConstraints;
 import org.trellisldp.event.EventSerializer;
 import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
+import org.trellisldp.http.core.DefaultEtagGenerator;
+import org.trellisldp.http.core.DefaultTimemapGenerator;
 import org.trellisldp.http.core.EtagGenerator;
 import org.trellisldp.http.core.TimemapGenerator;
 import org.trellisldp.io.JenaIOService;
@@ -72,8 +74,8 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
         ioService = buildIoService(config);
         auditService = resourceService = buildResourceService(config, environment);
         constraintServices = singletonList(new LdpConstraints());
-        timemapGenerator = new TimemapGenerator() { };
-        etagGenerator = new EtagGenerator() { };
+        timemapGenerator = new DefaultTimemapGenerator();
+        etagGenerator = new DefaultEtagGenerator();
     }
 
     @Override

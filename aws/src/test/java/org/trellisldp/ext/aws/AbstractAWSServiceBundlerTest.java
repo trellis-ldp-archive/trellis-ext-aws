@@ -27,6 +27,8 @@ import org.trellisldp.api.IOService;
 import org.trellisldp.api.ResourceService;
 import org.trellisldp.constraint.LdpConstraints;
 import org.trellisldp.event.EventSerializer;
+import org.trellisldp.http.core.DefaultEtagGenerator;
+import org.trellisldp.http.core.DefaultTimemapGenerator;
 import org.trellisldp.http.core.EtagGenerator;
 import org.trellisldp.http.core.ServiceBundler;
 import org.trellisldp.http.core.TimemapGenerator;
@@ -51,8 +53,8 @@ public class AbstractAWSServiceBundlerTest {
             this.auditService = auditService;
             this.resourceService = resourceService;
             this.constraintServices = singletonList(new LdpConstraints());
-            this.etagGenerator = new EtagGenerator() { };
-            this.timemapGenerator = new TimemapGenerator() { };
+            this.etagGenerator = new DefaultEtagGenerator();
+            this.timemapGenerator = new DefaultTimemapGenerator();
         }
 
         @Override
