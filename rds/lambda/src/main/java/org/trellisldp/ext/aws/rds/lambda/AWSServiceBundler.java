@@ -28,6 +28,7 @@ import org.trellisldp.api.IOService;
 import org.trellisldp.api.MementoService;
 import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.ResourceService;
+import org.trellisldp.audit.DefaultAuditService;
 import org.trellisldp.constraint.LdpConstraints;
 import org.trellisldp.event.EventSerializer;
 import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
@@ -51,7 +52,7 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
     private AuditService auditService;
     private IOService ioService;
     private MementoService mementoService;
-    private DBResourceService resourceService;
+    private ResourceService resourceService;
     private List<ConstraintService> constraintServices;
     private TimemapGenerator timemapGenerator;
     private EtagGenerator etagGenerator;
@@ -69,7 +70,8 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
         agentService = new SimpleAgentService();
         ioService = new JenaIOService(nsService, new HtmlSerializer(nsService));
         mementoService = new DBWrappedMementoService(jdbi, new S3MementoService());
-        auditService = resourceService = new DBResourceService(jdbi);
+        auditService = new DefaultAuditService();
+        resourceService = new DBResourceService(jdbi);
         constraintServices = singletonList(new LdpConstraints());
         timemapGenerator = new DefaultTimemapGenerator();
         etagGenerator = new DefaultEtagGenerator();

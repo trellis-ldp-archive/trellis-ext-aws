@@ -34,6 +34,7 @@ import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.RDFaWriterService;
 import org.trellisldp.api.ResourceService;
 import org.trellisldp.app.TrellisCache;
+import org.trellisldp.audit.DefaultAuditService;
 import org.trellisldp.constraint.LdpConstraints;
 import org.trellisldp.event.EventSerializer;
 import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
@@ -56,7 +57,7 @@ import org.trellisldp.triplestore.TriplestoreResourceService;
 public class TrellisServiceBundler extends AbstractAWSServiceBundler {
 
     private final AuditService auditService;
-    private final TriplestoreResourceService resourceService;
+    private final ResourceService resourceService;
     private final AgentService agentService;
     private final IOService ioService;
     private List<ConstraintService> constraintServices;
@@ -72,7 +73,8 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
         super(new EventSerializer());
         agentService = new SimpleAgentService();
         ioService = buildIoService(config);
-        auditService = resourceService = buildResourceService(config, environment);
+        auditService = new DefaultAuditService();
+        resourceService = buildResourceService(config, environment);
         constraintServices = singletonList(new LdpConstraints());
         timemapGenerator = new DefaultTimemapGenerator();
         etagGenerator = new DefaultEtagGenerator();

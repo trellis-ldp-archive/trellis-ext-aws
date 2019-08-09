@@ -24,7 +24,6 @@ public class AWSServiceBundlerTest {
     public void testServiceBundler() {
         final ServiceBundler bundler = new AWSServiceBundler();
 
-        assertEquals(bundler.getResourceService(), bundler.getAuditService(), "Incorrect audit/resource services!");
         assertNotNull(bundler.getBinaryService(), "Missing binary service!");
         assertNotNull(bundler.getEventService(), "Missing event service!");
         assertNotNull(bundler.getAuditService(), "Missing audit service!");

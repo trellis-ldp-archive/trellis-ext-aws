@@ -35,6 +35,7 @@ import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.RDFaWriterService;
 import org.trellisldp.api.ResourceService;
 import org.trellisldp.app.TrellisCache;
+import org.trellisldp.audit.DefaultAuditService;
 import org.trellisldp.constraint.LdpConstraints;
 import org.trellisldp.event.EventSerializer;
 import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
@@ -58,7 +59,7 @@ import org.trellisldp.rdfa.HtmlSerializer;
  */
 public class TrellisServiceBundler extends AbstractAWSServiceBundler {
 
-    private DBResourceService resourceService;
+    private ResourceService resourceService;
     private AuditService auditService;
     private IOService ioService;
     private AgentService agentService;
@@ -76,7 +77,8 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
         super(new EventSerializer());
         final Jdbi jdbi = new JdbiFactory().build(environment, config.getDataSourceFactory(), "trellis");
 
-        auditService = resourceService = new DBResourceService(jdbi);
+        auditService = new DefaultAuditService();
+        resourceService = new DBResourceService(jdbi);
         ioService = buildIoService(config, jdbi);
         agentService = new SimpleAgentService();
         mementoService = new DBWrappedMementoService(jdbi, new S3MementoService());
