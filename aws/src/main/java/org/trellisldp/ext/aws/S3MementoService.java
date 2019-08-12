@@ -152,13 +152,14 @@ public class S3MementoService implements MementoService {
                         new GetObjectRequest(bucketName, key), pathPrefix);
             }
             LOGGER.debug("Fetching mementos for {}", identifier);
-            final SortedSet<Instant> possible = listMementos(identifier).headSet(time.truncatedTo(SECONDS));
-            if (!possible.isEmpty()) {
-                final String best = getKey(identifier, possible.last());
-                return new S3Resource(client.getObjectMetadata(bucketName, best), client,
-                        new GetObjectRequest(bucketName, best), pathPrefix);
+            final SortedSet<Instant> allMementos = listMementos(identifier);
+            if (allMementos.isEmpty()) {
+                return MISSING_RESOURCE;
             }
-            return MISSING_RESOURCE;
+            final SortedSet<Instant> possible = allMementos.headSet(time.truncatedTo(SECONDS));
+            final String best = getKey(identifier, possible.isEmpty() ? allMementos.first() : possible.last());
+            return new S3Resource(client.getObjectMetadata(bucketName, best), client,
+                    new GetObjectRequest(bucketName, best), pathPrefix);
         });
     }
 
