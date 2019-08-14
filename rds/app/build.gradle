@@ -36,6 +36,7 @@ dependencies {
     compile("org.trellisldp:trellis-webac:$trellisVersion")
     compile("org.trellisldp:trellis-rdfa:$trellisVersion")
     compile("org.trellisldp:trellis-app:$trellisVersion")
+    compile("org.trellisldp:trellis-dropwizard:$trellisVersion")
     compile("org.trellisldp.ext:trellis-db:$trellisDbVersion")
 
     compile project(":trellis-aws")
