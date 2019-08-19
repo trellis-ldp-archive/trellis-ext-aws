@@ -25,7 +25,7 @@ import io.dropwizard.setup.Environment;
 import java.util.List;
 
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.trellisldp.agent.SimpleAgentService;
+import org.trellisldp.agent.DefaultAgentService;
 import org.trellisldp.api.AgentService;
 import org.trellisldp.api.AuditService;
 import org.trellisldp.api.ConstraintService;
@@ -34,17 +34,17 @@ import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.RDFaWriterService;
 import org.trellisldp.api.ResourceService;
 import org.trellisldp.audit.DefaultAuditService;
-import org.trellisldp.constraint.LdpConstraints;
+import org.trellisldp.constraint.LdpConstraintService;
 import org.trellisldp.dropwizard.TrellisCache;
-import org.trellisldp.event.EventSerializer;
+import org.trellisldp.event.DefaultActivityStreamService;
 import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
 import org.trellisldp.http.core.DefaultEtagGenerator;
 import org.trellisldp.http.core.DefaultTimemapGenerator;
 import org.trellisldp.http.core.EtagGenerator;
 import org.trellisldp.http.core.TimemapGenerator;
 import org.trellisldp.io.JenaIOService;
-import org.trellisldp.namespaces.NamespacesJsonContext;
-import org.trellisldp.rdfa.HtmlSerializer;
+import org.trellisldp.namespaces.JsonNamespaceService;
+import org.trellisldp.rdfa.DefaultRdfaWriterService;
 import org.trellisldp.triplestore.TriplestoreResourceService;
 
 /**
@@ -70,12 +70,12 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
      * @param environment the dropwizard environment
      */
     public TrellisServiceBundler(final AppConfiguration config, final Environment environment) {
-        super(new EventSerializer());
-        agentService = new SimpleAgentService();
+        super(new DefaultActivityStreamService());
+        agentService = new DefaultAgentService();
         ioService = buildIoService(config);
         auditService = new DefaultAuditService();
         resourceService = buildResourceService(config, environment);
-        constraintServices = singletonList(new LdpConstraints());
+        constraintServices = singletonList(new LdpConstraintService());
         timemapGenerator = new DefaultTimemapGenerator();
         etagGenerator = new DefaultEtagGenerator();
     }
@@ -129,9 +129,10 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
         final long hours = config.getJsonld().getCacheExpireHours();
         final Cache<String, String> cache = newBuilder().maximumSize(cacheSize).expireAfterAccess(hours, HOURS).build();
         final TrellisCache<String, String> profileCache = new TrellisCache<>(cache);
-        final NamespaceService namespaceService = new NamespacesJsonContext(config.getNamespaces());
-        final RDFaWriterService htmlSerializer = new HtmlSerializer(namespaceService, config.getAssets().getTemplate(),
-                config.getAssets().getCss(), config.getAssets().getJs(), config.getAssets().getIcon());
+        final NamespaceService namespaceService = new JsonNamespaceService(config.getNamespaces());
+        final RDFaWriterService htmlSerializer = new DefaultRdfaWriterService(namespaceService,
+                config.getAssets().getTemplate(), config.getAssets().getCss(), config.getAssets().getJs(),
+                config.getAssets().getIcon());
         return new JenaIOService(namespaceService, htmlSerializer, profileCache,
                 config.getJsonld().getContextWhitelist(), config.getJsonld().getContextDomainWhitelist());
     }

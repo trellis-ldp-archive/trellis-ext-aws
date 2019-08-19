@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.eclipse.microprofile.config.Config;
 import org.jdbi.v3.core.Jdbi;
-import org.trellisldp.agent.SimpleAgentService;
+import org.trellisldp.agent.DefaultAgentService;
 import org.trellisldp.api.AgentService;
 import org.trellisldp.api.AuditService;
 import org.trellisldp.api.ConstraintService;
@@ -29,8 +29,8 @@ import org.trellisldp.api.MementoService;
 import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.ResourceService;
 import org.trellisldp.audit.DefaultAuditService;
-import org.trellisldp.constraint.LdpConstraints;
-import org.trellisldp.event.EventSerializer;
+import org.trellisldp.constraint.LdpConstraintService;
+import org.trellisldp.event.DefaultActivityStreamService;
 import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
 import org.trellisldp.ext.aws.S3MementoService;
 import org.trellisldp.ext.db.DBNamespaceService;
@@ -41,7 +41,7 @@ import org.trellisldp.http.core.DefaultTimemapGenerator;
 import org.trellisldp.http.core.EtagGenerator;
 import org.trellisldp.http.core.TimemapGenerator;
 import org.trellisldp.io.JenaIOService;
-import org.trellisldp.rdfa.HtmlSerializer;
+import org.trellisldp.rdfa.DefaultRdfaWriterService;
 
 /**
  * An AWS-Based service bundler.
@@ -61,18 +61,18 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
      * Get an AWS-based service bundler using Newton.
      */
     public AWSServiceBundler() {
-        super(new EventSerializer());
+        super(new DefaultActivityStreamService());
         final Config config = getConfig();
         final Jdbi jdbi = Jdbi.create(config.getValue("trellis.jdbc.url", String.class),
                 config.getValue("trellis.jdbc.username", String.class),
                 config.getValue("trellis.jdbc.password", String.class));
         final NamespaceService nsService = new DBNamespaceService(jdbi);
-        agentService = new SimpleAgentService();
-        ioService = new JenaIOService(nsService, new HtmlSerializer(nsService));
+        agentService = new DefaultAgentService();
+        ioService = new JenaIOService(nsService, new DefaultRdfaWriterService(nsService));
         mementoService = new DBWrappedMementoService(jdbi, new S3MementoService());
         auditService = new DefaultAuditService();
         resourceService = new DBResourceService(jdbi);
-        constraintServices = singletonList(new LdpConstraints());
+        constraintServices = singletonList(new LdpConstraintService());
         timemapGenerator = new DefaultTimemapGenerator();
         etagGenerator = new DefaultEtagGenerator();
     }

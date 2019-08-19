@@ -34,7 +34,7 @@ import org.mockito.Mock;
 import org.trellisldp.api.ActivityStreamService;
 import org.trellisldp.api.Event;
 import org.trellisldp.api.EventService;
-import org.trellisldp.event.EventSerializer;
+import org.trellisldp.event.DefaultActivityStreamService;
 import org.trellisldp.vocabulary.AS;
 import org.trellisldp.vocabulary.LDP;
 
@@ -45,7 +45,7 @@ public class SNSEventServiceTest {
     private static final IRI target = rdf.createIRI("http://example.com/resource");
     private static final IRI agent = rdf.createIRI("http://example.com/agent");
     private static final Instant time = now();
-    private static final ActivityStreamService serializer = new EventSerializer();
+    private static final ActivityStreamService serializer = new DefaultActivityStreamService();
 
     @Mock
     private Event mockEvent;

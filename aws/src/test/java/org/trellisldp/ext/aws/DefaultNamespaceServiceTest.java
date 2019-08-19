@@ -18,11 +18,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.trellisldp.api.NamespaceService;
 
-public class SimpleNamespaceServiceTest {
+public class DefaultNamespaceServiceTest {
 
     @Test
     public void testNamespace() {
-        final NamespaceService svc = new SimpleNamespaceService();
+        final NamespaceService svc = new DefaultNamespaceService();
         assertEquals(15, svc.getNamespaces().size());
         assertTrue(svc.setPrefix("foo", "bar"));
         assertEquals(15, svc.getNamespaces().size());
@@ -30,7 +30,7 @@ public class SimpleNamespaceServiceTest {
 
     @Test
     public void testEnvNamespace() {
-        final NamespaceService svc = new SimpleNamespaceService();
+        final NamespaceService svc = new DefaultNamespaceService();
         final String ns = "http://example.com/test/";
         assertEquals(ns, System.getProperty("trellis.ns-test"));
         assertEquals(ns, svc.getNamespaces().get("test"));

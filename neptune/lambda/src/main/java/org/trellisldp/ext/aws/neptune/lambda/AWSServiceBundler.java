@@ -20,7 +20,7 @@ import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 import java.util.List;
 
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.trellisldp.agent.SimpleAgentService;
+import org.trellisldp.agent.DefaultAgentService;
 import org.trellisldp.api.AgentService;
 import org.trellisldp.api.AuditService;
 import org.trellisldp.api.ConstraintService;
@@ -28,16 +28,16 @@ import org.trellisldp.api.IOService;
 import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.ResourceService;
 import org.trellisldp.audit.DefaultAuditService;
-import org.trellisldp.constraint.LdpConstraints;
-import org.trellisldp.event.EventSerializer;
+import org.trellisldp.constraint.LdpConstraintService;
+import org.trellisldp.event.DefaultActivityStreamService;
 import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
-import org.trellisldp.ext.aws.SimpleNamespaceService;
+import org.trellisldp.ext.aws.DefaultNamespaceService;
 import org.trellisldp.http.core.DefaultEtagGenerator;
 import org.trellisldp.http.core.DefaultTimemapGenerator;
 import org.trellisldp.http.core.EtagGenerator;
 import org.trellisldp.http.core.TimemapGenerator;
 import org.trellisldp.io.JenaIOService;
-import org.trellisldp.rdfa.HtmlSerializer;
+import org.trellisldp.rdfa.DefaultRdfaWriterService;
 import org.trellisldp.triplestore.TriplestoreResourceService;
 
 /**
@@ -60,15 +60,15 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
      * Get an AWS-based service bundler using Newton.
      */
     public AWSServiceBundler() {
-        super(new EventSerializer());
+        super(new DefaultActivityStreamService());
         final RDFConnection rdfConnection = connect(getConfig().getValue(TRELLIS_NEPTUNE_URL, String.class));
-        final NamespaceService nsService = new SimpleNamespaceService();
+        final NamespaceService nsService = new DefaultNamespaceService();
 
-        agentService = new SimpleAgentService();
-        ioService = new JenaIOService(nsService, new HtmlSerializer(nsService));
+        agentService = new DefaultAgentService();
+        ioService = new JenaIOService(nsService, new DefaultRdfaWriterService(nsService));
         auditService = new DefaultAuditService();
         resourceService = new TriplestoreResourceService(rdfConnection);
-        constraintServices = singletonList(new LdpConstraints());
+        constraintServices = singletonList(new LdpConstraintService());
         timemapGenerator = new DefaultTimemapGenerator();
         etagGenerator = new DefaultEtagGenerator();
     }

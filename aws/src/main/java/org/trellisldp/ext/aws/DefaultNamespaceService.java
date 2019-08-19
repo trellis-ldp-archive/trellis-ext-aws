@@ -41,7 +41,7 @@ import org.trellisldp.vocabulary.XSD;
  * system properties into the namespace maping if they are defined like so:
  * "trellis.ns-myprefix=http://example.com/namespace"
  */
-public class SimpleNamespaceService implements NamespaceService {
+public class DefaultNamespaceService implements NamespaceService {
 
     private static final String PREFIX = "trellis.ns-";
 
@@ -50,7 +50,7 @@ public class SimpleNamespaceService implements NamespaceService {
     /**
      * Create a simple, in-memory namespace service.
      */
-    public SimpleNamespaceService() {
+    public DefaultNamespaceService() {
         namespaces.put("ldp", LDP.getNamespace());
         namespaces.put("acl", ACL.getNamespace());
         namespaces.put("as", AS.getNamespace());
