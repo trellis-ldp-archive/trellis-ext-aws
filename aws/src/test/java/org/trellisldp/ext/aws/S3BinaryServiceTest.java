@@ -25,7 +25,6 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.rdf.api.IRI;
@@ -62,8 +61,8 @@ public class S3BinaryServiceTest {
         svc.get(identifier).thenAccept(binary -> {
             try {
                 assertEquals("A sample binary file.",
-                        IOUtils.toString(binary.getContent().toCompletableFuture().get(), UTF_8).trim());
-            } catch (final IOException | ExecutionException | InterruptedException ex) {
+                        IOUtils.toString(binary.getContent(), UTF_8).trim());
+            } catch (final IOException ex) {
                 fail("Error reading IO stream", ex);
             }
         }).toCompletableFuture().join();
@@ -71,8 +70,8 @@ public class S3BinaryServiceTest {
         svc.get(identifier).thenAccept(binary -> {
             try {
                 assertEquals("ple bi",
-                        IOUtils.toString(binary.getContent(5, 10).toCompletableFuture().get(), UTF_8).trim());
-            } catch (final IOException | ExecutionException | InterruptedException ex) {
+                        IOUtils.toString(binary.getContent(5, 10), UTF_8).trim());
+            } catch (final IOException ex) {
                 fail("Error reading IO stream", ex);
             }
         }).toCompletableFuture().join();

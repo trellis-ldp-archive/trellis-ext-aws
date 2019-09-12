@@ -13,13 +13,10 @@
  */
 package org.trellisldp.ext.aws;
 
-import static java.util.concurrent.CompletableFuture.completedFuture;
-
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 
 import java.io.InputStream;
-import java.util.concurrent.CompletionStage;
 
 import org.trellisldp.api.Binary;
 
@@ -45,13 +42,13 @@ public class S3Binary implements Binary {
     }
 
     @Override
-    public CompletionStage<InputStream> getContent() {
-        return completedFuture(client.getObject(new GetObjectRequest(bucketName, key)).getObjectContent());
+    public InputStream getContent() {
+        return client.getObject(new GetObjectRequest(bucketName, key)).getObjectContent();
     }
 
     @Override
-    public CompletionStage<InputStream> getContent(final int from, final int to) {
-        return completedFuture(client
-                .getObject(new GetObjectRequest(bucketName, key).withRange(from, to)).getObjectContent());
+    public InputStream getContent(final int from, final int to) {
+        return client
+                .getObject(new GetObjectRequest(bucketName, key).withRange(from, to)).getObjectContent();
     }
 }
