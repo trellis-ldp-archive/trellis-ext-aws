@@ -38,9 +38,7 @@ import org.trellisldp.constraint.LdpConstraintService;
 import org.trellisldp.dropwizard.TrellisCache;
 import org.trellisldp.event.DefaultActivityStreamService;
 import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
-import org.trellisldp.http.core.DefaultEtagGenerator;
 import org.trellisldp.http.core.DefaultTimemapGenerator;
-import org.trellisldp.http.core.EtagGenerator;
 import org.trellisldp.http.core.TimemapGenerator;
 import org.trellisldp.io.JenaIOService;
 import org.trellisldp.namespaces.JsonNamespaceService;
@@ -62,7 +60,6 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
     private final IOService ioService;
     private List<ConstraintService> constraintServices;
     private TimemapGenerator timemapGenerator;
-    private EtagGenerator etagGenerator;
 
     /**
      * Create a new application service bundler.
@@ -77,7 +74,6 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
         resourceService = buildResourceService(config, environment);
         constraintServices = singletonList(new LdpConstraintService());
         timemapGenerator = new DefaultTimemapGenerator();
-        etagGenerator = new DefaultEtagGenerator();
     }
 
     @Override
@@ -108,11 +104,6 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
     @Override
     public TimemapGenerator getTimemapGenerator() {
         return timemapGenerator;
-    }
-
-    @Override
-    public EtagGenerator getEtagGenerator() {
-        return etagGenerator;
     }
 
     private static TriplestoreResourceService buildResourceService(final AppConfiguration config,

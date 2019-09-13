@@ -33,6 +33,5 @@ public class AWSServiceBundlerTest {
         assertNotNull(bundler.getAgentService(), "Missing agent service!");
         assertTrue(bundler.getConstraintServices().iterator().hasNext(), "Missing constraint services!");
         assertNotNull(bundler.getTimemapGenerator(), "Missing timemap generator!");
-        assertNotNull(bundler.getEtagGenerator(), "Missing etag generator!");
     }
 }

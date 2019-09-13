@@ -32,9 +32,7 @@ import org.trellisldp.constraint.LdpConstraintService;
 import org.trellisldp.event.DefaultActivityStreamService;
 import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
 import org.trellisldp.ext.aws.DefaultNamespaceService;
-import org.trellisldp.http.core.DefaultEtagGenerator;
 import org.trellisldp.http.core.DefaultTimemapGenerator;
-import org.trellisldp.http.core.EtagGenerator;
 import org.trellisldp.http.core.TimemapGenerator;
 import org.trellisldp.io.JenaIOService;
 import org.trellisldp.rdfa.DefaultRdfaWriterService;
@@ -54,7 +52,6 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
     private ResourceService resourceService;
     private List<ConstraintService> constraintServices;
     private TimemapGenerator timemapGenerator;
-    private EtagGenerator etagGenerator;
 
     /**
      * Get an AWS-based service bundler using Newton.
@@ -70,7 +67,6 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
         resourceService = new TriplestoreResourceService(rdfConnection);
         constraintServices = singletonList(new LdpConstraintService());
         timemapGenerator = new DefaultTimemapGenerator();
-        etagGenerator = new DefaultEtagGenerator();
     }
 
     @Override
@@ -96,11 +92,6 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
     @Override
     public Iterable<ConstraintService> getConstraintServices() {
         return constraintServices;
-    }
-
-    @Override
-    public EtagGenerator getEtagGenerator() {
-        return etagGenerator;
     }
 
     @Override

@@ -43,9 +43,7 @@ import org.trellisldp.ext.aws.S3MementoService;
 import org.trellisldp.ext.db.DBNamespaceService;
 import org.trellisldp.ext.db.DBResourceService;
 import org.trellisldp.ext.db.DBWrappedMementoService;
-import org.trellisldp.http.core.DefaultEtagGenerator;
 import org.trellisldp.http.core.DefaultTimemapGenerator;
-import org.trellisldp.http.core.EtagGenerator;
 import org.trellisldp.http.core.TimemapGenerator;
 import org.trellisldp.io.JenaIOService;
 import org.trellisldp.rdfa.DefaultRdfaWriterService;
@@ -66,7 +64,6 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
     private MementoService mementoService;
     private List<ConstraintService> constraintServices;
     private TimemapGenerator timemapGenerator;
-    private EtagGenerator etagGenerator;
 
     /**
      * Create a new application service bundler.
@@ -84,7 +81,6 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
         mementoService = new DBWrappedMementoService(jdbi, new S3MementoService());
         constraintServices = singletonList(new LdpConstraintService());
         timemapGenerator = new DefaultTimemapGenerator();
-        etagGenerator = new DefaultEtagGenerator();
     }
 
     @Override
@@ -110,11 +106,6 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
     @Override
     public MementoService getMementoService() {
         return mementoService;
-    }
-
-    @Override
-    public EtagGenerator getEtagGenerator() {
-        return etagGenerator;
     }
 
     @Override
