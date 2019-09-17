@@ -30,7 +30,6 @@ public class AWSServiceBundlerTest {
         assertNotNull(bundler.getMementoService(), "Missing memento service!");
         assertNotNull(bundler.getIOService(), "Missing I/O service!");
         assertNotNull(bundler.getResourceService(), "Missing resource service!");
-        assertNotNull(bundler.getAgentService(), "Missing agent service!");
         assertTrue(bundler.getConstraintServices().iterator().hasNext(), "Missing constraint services!");
         assertNotNull(bundler.getTimemapGenerator(), "Missing timemap generator!");
     }

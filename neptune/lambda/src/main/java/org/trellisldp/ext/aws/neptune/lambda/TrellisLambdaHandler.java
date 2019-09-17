@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.glassfish.jersey.server.ResourceConfig;
-import org.trellisldp.http.AgentAuthorizationFilter;
 import org.trellisldp.http.TrellisHttpResource;
 import org.trellisldp.http.core.ServiceBundler;
 
@@ -33,8 +32,7 @@ public class TrellisLambdaHandler implements RequestStreamHandler {
     private static final ServiceBundler serviceBundler = new AWSServiceBundler();
 
     private static final ResourceConfig jerseyApplication
-        = new ResourceConfig().register(new TrellisHttpResource(serviceBundler))
-                              .register(new AgentAuthorizationFilter(serviceBundler.getAgentService()));
+        = new ResourceConfig().register(new TrellisHttpResource(serviceBundler));
 
     private static final JerseyLambdaContainerHandler<AwsProxyRequest, AwsProxyResponse> handler
             = JerseyLambdaContainerHandler.getAwsProxyHandler(jerseyApplication);

@@ -20,8 +20,6 @@ import java.util.List;
 
 import org.eclipse.microprofile.config.Config;
 import org.jdbi.v3.core.Jdbi;
-import org.trellisldp.agent.DefaultAgentService;
-import org.trellisldp.api.AgentService;
 import org.trellisldp.api.AuditService;
 import org.trellisldp.api.ConstraintService;
 import org.trellisldp.api.IOService;
@@ -46,7 +44,6 @@ import org.trellisldp.rdfa.DefaultRdfaWriterService;
  */
 public class AWSServiceBundler extends AbstractAWSServiceBundler {
 
-    private AgentService agentService;
     private AuditService auditService;
     private IOService ioService;
     private MementoService mementoService;
@@ -64,7 +61,6 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
                 config.getValue("trellis.jdbc.username", String.class),
                 config.getValue("trellis.jdbc.password", String.class));
         final NamespaceService nsService = new DBNamespaceService(jdbi);
-        agentService = new DefaultAgentService();
         ioService = new JenaIOService(nsService, new DefaultRdfaWriterService(nsService));
         mementoService = new DBWrappedMementoService(jdbi, new S3MementoService());
         auditService = new DefaultAuditService();
@@ -81,11 +77,6 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
     @Override
     public MementoService getMementoService() {
         return mementoService;
-    }
-
-    @Override
-    public AgentService getAgentService() {
-        return agentService;
     }
 
     @Override

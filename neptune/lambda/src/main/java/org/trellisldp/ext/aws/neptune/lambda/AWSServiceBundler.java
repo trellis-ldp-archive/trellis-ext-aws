@@ -20,8 +20,6 @@ import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 import java.util.List;
 
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.trellisldp.agent.DefaultAgentService;
-import org.trellisldp.api.AgentService;
 import org.trellisldp.api.AuditService;
 import org.trellisldp.api.ConstraintService;
 import org.trellisldp.api.IOService;
@@ -46,7 +44,6 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
     /** The configuration key for the Neptune URL. **/
     public static final String TRELLIS_NEPTUNE_URL = "trellis.neptune.url";
 
-    private AgentService agentService;
     private AuditService auditService;
     private IOService ioService;
     private ResourceService resourceService;
@@ -61,17 +58,11 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
         final RDFConnection rdfConnection = connect(getConfig().getValue(TRELLIS_NEPTUNE_URL, String.class));
         final NamespaceService nsService = new DefaultNamespaceService();
 
-        agentService = new DefaultAgentService();
         ioService = new JenaIOService(nsService, new DefaultRdfaWriterService(nsService));
         auditService = new DefaultAuditService();
         resourceService = new TriplestoreResourceService(rdfConnection);
         constraintServices = singletonList(new LdpConstraintService());
         timemapGenerator = new DefaultTimemapGenerator();
-    }
-
-    @Override
-    public AgentService getAgentService() {
-        return agentService;
     }
 
     @Override

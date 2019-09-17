@@ -25,8 +25,6 @@ import io.dropwizard.setup.Environment;
 import java.util.List;
 
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.trellisldp.agent.DefaultAgentService;
-import org.trellisldp.api.AgentService;
 import org.trellisldp.api.AuditService;
 import org.trellisldp.api.ConstraintService;
 import org.trellisldp.api.IOService;
@@ -56,7 +54,6 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
 
     private final AuditService auditService;
     private final ResourceService resourceService;
-    private final AgentService agentService;
     private final IOService ioService;
     private List<ConstraintService> constraintServices;
     private TimemapGenerator timemapGenerator;
@@ -68,7 +65,6 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
      */
     public TrellisServiceBundler(final AppConfiguration config, final Environment environment) {
         super(new DefaultActivityStreamService());
-        agentService = new DefaultAgentService();
         ioService = buildIoService(config);
         auditService = new DefaultAuditService();
         resourceService = buildResourceService(config, environment);
@@ -84,11 +80,6 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
     @Override
     public AuditService getAuditService() {
         return auditService;
-    }
-
-    @Override
-    public AgentService getAgentService() {
-        return agentService;
     }
 
     @Override

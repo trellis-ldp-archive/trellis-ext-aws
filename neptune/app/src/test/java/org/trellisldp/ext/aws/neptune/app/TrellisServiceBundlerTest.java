@@ -52,7 +52,6 @@ public class TrellisServiceBundlerTest {
 
         assertNotNull(bundler.getBinaryService(), "Missing binary service!");
         assertNotNull(bundler.getEventService(), "Missing event service!");
-        assertNotNull(bundler.getAgentService(), "Missing agent service!");
         assertNotNull(bundler.getAuditService(), "Missing audit service!");
         assertNotNull(bundler.getIOService(), "Missing I/O service!");
         assertNotNull(bundler.getMementoService(), "Missing memento service!");

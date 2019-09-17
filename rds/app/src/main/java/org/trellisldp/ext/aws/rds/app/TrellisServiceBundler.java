@@ -25,8 +25,6 @@ import io.dropwizard.setup.Environment;
 import java.util.List;
 
 import org.jdbi.v3.core.Jdbi;
-import org.trellisldp.agent.DefaultAgentService;
-import org.trellisldp.api.AgentService;
 import org.trellisldp.api.AuditService;
 import org.trellisldp.api.ConstraintService;
 import org.trellisldp.api.IOService;
@@ -60,7 +58,6 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
     private ResourceService resourceService;
     private AuditService auditService;
     private IOService ioService;
-    private AgentService agentService;
     private MementoService mementoService;
     private List<ConstraintService> constraintServices;
     private TimemapGenerator timemapGenerator;
@@ -77,7 +74,6 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
         auditService = new DefaultAuditService();
         resourceService = new DBResourceService(jdbi);
         ioService = buildIoService(config, jdbi);
-        agentService = new DefaultAgentService();
         mementoService = new DBWrappedMementoService(jdbi, new S3MementoService());
         constraintServices = singletonList(new LdpConstraintService());
         timemapGenerator = new DefaultTimemapGenerator();
@@ -91,11 +87,6 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
     @Override
     public IOService getIOService() {
         return ioService;
-    }
-
-    @Override
-    public AgentService getAgentService() {
-        return agentService;
     }
 
     @Override

@@ -15,7 +15,6 @@ dependencies {
     implementation("org.eclipse.microprofile.config:microprofile-config-api:$microprofileConfigVersion")
     implementation("org.jdbi:jdbi3-core:$jdbiVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
-    implementation("org.trellisldp:trellis-agent:$trellisVersion")
     implementation("org.trellisldp:trellis-audit:$trellisVersion")
     implementation("org.trellisldp:trellis-constraint-rules:$trellisVersion")
     implementation("org.trellisldp:trellis-event-serialization:$trellisVersion")

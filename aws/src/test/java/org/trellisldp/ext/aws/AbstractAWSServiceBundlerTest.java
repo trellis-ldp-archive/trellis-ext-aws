@@ -20,7 +20,6 @@ import static org.mockito.Mockito.mock;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.trellisldp.api.AgentService;
 import org.trellisldp.api.AuditService;
 import org.trellisldp.api.ConstraintService;
 import org.trellisldp.api.IOService;
@@ -37,16 +36,14 @@ public class AbstractAWSServiceBundlerTest {
 
         private final AuditService auditService;
         private final ResourceService resourceService;
-        private final AgentService agentService;
         private final IOService ioService;
         private final List<ConstraintService> constraintServices;
         private final TimemapGenerator timemapGenerator;
 
         public TestServiceBundler(final AuditService auditService, final ResourceService resourceService,
-                final IOService ioService, final AgentService agentService) {
+                final IOService ioService) {
             super(new DefaultActivityStreamService());
             this.ioService = ioService;
-            this.agentService = agentService;
             this.auditService = auditService;
             this.resourceService = resourceService;
             this.constraintServices = singletonList(new LdpConstraintService());
@@ -56,11 +53,6 @@ public class AbstractAWSServiceBundlerTest {
         @Override
         public ResourceService getResourceService() {
             return resourceService;
-        }
-
-        @Override
-        public AgentService getAgentService() {
-            return agentService;
         }
 
         @Override
@@ -89,15 +81,13 @@ public class AbstractAWSServiceBundlerTest {
         final AuditService mockAuditService = mock(AuditService.class);
         final ResourceService mockResourceService = mock(ResourceService.class);
         final IOService mockIOService = mock(IOService.class);
-        final AgentService mockAgentService = mock(AgentService.class);
 
         final ServiceBundler bundler = new TestServiceBundler(mockAuditService,
-                mockResourceService, mockIOService, mockAgentService);
+                mockResourceService, mockIOService);
 
         assertNotNull(bundler.getMementoService(), "Missing memento service!");
         assertNotNull(bundler.getBinaryService(), "Missing binary service!");
         assertNotNull(bundler.getEventService(), "Missing event service!");
-        assertEquals(mockAgentService, bundler.getAgentService(), "Missing agent service!");
         assertEquals(mockAuditService, bundler.getAuditService(), "Missing audit service!");
         assertEquals(mockIOService, bundler.getIOService(), "Missing I/O service!");
         assertEquals(mockResourceService, bundler.getResourceService(), "Missing resource service!");
