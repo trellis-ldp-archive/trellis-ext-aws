@@ -7,46 +7,48 @@ ext {
 }
 
 dependencies {
-    compile("io.dropwizard:dropwizard-auth:$dropwizardVersion")
-    compile("io.dropwizard:dropwizard-core:$dropwizardVersion")
-    compile("io.dropwizard:dropwizard-http2:$dropwizardVersion")
-    compile("io.dropwizard:dropwizard-metrics:$dropwizardVersion")
-    compile("io.smallrye:smallrye-config:$smallryeVersion")
-    compile("org.apache.jena:jena-rdfconnection:$jenaVersion")
-    compile("org.apache.jena:jena-arq:$jenaVersion")
-    compile("org.eclipse.microprofile.config:microprofile-config-api:$microprofileConfigVersion")
-    compile("org.slf4j:slf4j-api:$slf4jVersion")
+    implementation enforcedPlatform("org.trellisldp:trellis-bom:${trellisVersion}")
 
-    compile("org.trellisldp:trellis-api:$trellisVersion")
-    compile("org.trellisldp:trellis-audit:$trellisVersion")
-    compile("org.trellisldp:trellis-constraint-rules:$trellisVersion")
-    compile("org.trellisldp:trellis-event-serialization:$trellisVersion")
-    compile("org.trellisldp:trellis-http:$trellisVersion")
-    compile("org.trellisldp:trellis-io-jena:$trellisVersion")
-    compile("org.trellisldp:trellis-namespaces:$trellisVersion")
-    compile("org.trellisldp:trellis-triplestore:$trellisVersion")
-    compile("org.trellisldp:trellis-vocabulary:$trellisVersion")
-    compile("org.trellisldp:trellis-webac:$trellisVersion")
-    compile("org.trellisldp:trellis-rdfa:$trellisVersion")
-    compile("org.trellisldp:trellis-app:$trellisVersion")
-    compile("org.trellisldp:trellis-dropwizard:$trellisVersion")
+    implementation("io.dropwizard:dropwizard-auth:$dropwizardVersion")
+    implementation("io.dropwizard:dropwizard-core:$dropwizardVersion")
+    implementation("io.dropwizard:dropwizard-http2:$dropwizardVersion")
+    implementation("io.dropwizard:dropwizard-metrics:$dropwizardVersion")
+    implementation("io.smallrye:smallrye-config:$smallryeVersion")
+    implementation("org.apache.jena:jena-rdfconnection:$jenaVersion")
+    implementation("org.apache.jena:jena-arq:$jenaVersion")
+    implementation("org.eclipse.microprofile.config:microprofile-config-api:$microprofileConfigVersion")
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
 
-    compile project(":trellis-aws")
+    implementation "org.trellisldp:trellis-api"
+    implementation "org.trellisldp:trellis-audit"
+    implementation "org.trellisldp:trellis-constraint-rules"
+    implementation "org.trellisldp:trellis-event-serialization"
+    implementation "org.trellisldp:trellis-http"
+    implementation "org.trellisldp:trellis-io-jena"
+    implementation "org.trellisldp:trellis-namespaces"
+    implementation "org.trellisldp:trellis-triplestore"
+    implementation "org.trellisldp:trellis-vocabulary"
+    implementation "org.trellisldp:trellis-webac"
+    implementation "org.trellisldp:trellis-rdfa"
+    implementation "org.trellisldp:trellis-app"
+    implementation "org.trellisldp:trellis-dropwizard"
 
-    runtime("javax.xml.bind:jaxb-api:$jaxbVersion")
-    runtime("javax.activation:activation:$activationVersion")
+    implementation project(":trellis-aws")
 
-    testCompile("ch.qos.logback:logback-classic:$logbackVersion")
-    testCompile("com.google.guava:guava:$guavaVersion")
-    testCompile("io.dropwizard:dropwizard-client:$dropwizardVersion")
-    testCompile("io.dropwizard:dropwizard-testing:$dropwizardVersion")
-    testCompile("org.apache.commons:commons-rdf-jena:$commonsRdfVersion") {
+    runtime "javax.xml.bind:jaxb-api:$jaxbVersion"
+    runtime "javax.activation:activation:$activationVersion"
+
+    testImplementation "ch.qos.logback:logback-classic:$logbackVersion"
+    testImplementation "com.google.guava:guava:$guavaVersion"
+    testImplementation "io.dropwizard:dropwizard-client:$dropwizardVersion"
+    testImplementation "io.dropwizard:dropwizard-testing:$dropwizardVersion"
+    testImplementation("org.apache.commons:commons-rdf-jena:$commonsRdfVersion") {
         exclude group: "org.apache.jena", module: "jena-osgi"
         exclude group: 'org.apache.servicemix.bundles', module: 'org.apache.servicemix.bundles.xerces'
     }
-    testCompile("org.apache.commons:commons-text:$commonsTextVersion")
-    testCompile("org.mockito:mockito-core:$mockitoVersion")
-    testCompile("org.trellisldp:trellis-test:$trellisVersion")
+    testImplementation "org.apache.commons:commons-text:$commonsTextVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation "org.trellisldp:trellis-test"
 }
 
 jar {

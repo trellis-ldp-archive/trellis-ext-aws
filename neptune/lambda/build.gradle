@@ -7,23 +7,25 @@ ext {
 }
 
 dependencies {
-    api("org.trellisldp:trellis-api:$trellisVersion")
-    api("com.amazonaws:aws-java-sdk-lambda:$awsVersion")
+    implementation enforcedPlatform("org.trellisldp:trellis-bom:${trellisVersion}")
 
-    implementation("com.amazonaws.serverless:aws-serverless-java-container-jersey:$awsJerseyVersion")
-    implementation("io.smallrye:smallrye-config:$smallryeVersion")
-    implementation("org.apache.jena:jena-arq:$jenaVersion")
-    implementation("org.apache.jena:jena-rdfconnection:$jenaVersion")
-    implementation("org.eclipse.microprofile.config:microprofile-config-api:$microprofileConfigVersion")
-    implementation("org.slf4j:slf4j-api:$slf4jVersion")
-    implementation("org.trellisldp:trellis-audit:$trellisVersion")
-    implementation("org.trellisldp:trellis-constraint-rules:$trellisVersion")
-    implementation("org.trellisldp:trellis-event-serialization:$trellisVersion")
-    implementation("org.trellisldp:trellis-io-jena:$trellisVersion")
-    implementation("org.trellisldp:trellis-http:$trellisVersion")
-    implementation("org.trellisldp:trellis-rdfa:$trellisVersion")
-    implementation("org.trellisldp:trellis-triplestore:$trellisVersion")
-    implementation("org.trellisldp:trellis-vocabulary:$trellisVersion")
+    api "org.trellisldp:trellis-api"
+    api "com.amazonaws:aws-java-sdk-lambda:$awsVersion"
+
+    implementation "com.amazonaws.serverless:aws-serverless-java-container-jersey:$awsJerseyVersion"
+    implementation "io.smallrye:smallrye-config:$smallryeVersion"
+    implementation "org.apache.jena:jena-arq:$jenaVersion"
+    implementation "org.apache.jena:jena-rdfconnection:$jenaVersion"
+    implementation "org.eclipse.microprofile.config:microprofile-config-api:$microprofileConfigVersion"
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    implementation "org.trellisldp:trellis-audit"
+    implementation "org.trellisldp:trellis-constraint-rules"
+    implementation "org.trellisldp:trellis-event-serialization"
+    implementation "org.trellisldp:trellis-io-jena"
+    implementation "org.trellisldp:trellis-http"
+    implementation "org.trellisldp:trellis-rdfa"
+    implementation "org.trellisldp:trellis-triplestore"
+    implementation "org.trellisldp:trellis-vocabulary"
     implementation project(":trellis-aws")
 
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
