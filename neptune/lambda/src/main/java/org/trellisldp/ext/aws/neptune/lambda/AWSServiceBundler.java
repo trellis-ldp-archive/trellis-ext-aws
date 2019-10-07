@@ -66,13 +66,13 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
     }
 
     @Override
-    public ResourceService getResourceService() {
-        return resourceService;
+    public TimemapGenerator getTimemapGenerator() {
+        return timemapGenerator;
     }
 
     @Override
-    public AuditService getAuditService() {
-        return auditService;
+    public ResourceService getResourceService() {
+        return resourceService;
     }
 
     @Override
@@ -81,12 +81,12 @@ public class AWSServiceBundler extends AbstractAWSServiceBundler {
     }
 
     @Override
-    public Iterable<ConstraintService> getConstraintServices() {
-        return constraintServices;
+    public AuditService getAuditService() {
+        return auditService;
     }
 
     @Override
-    public TimemapGenerator getTimemapGenerator() {
-        return timemapGenerator;
+    public Iterable<ConstraintService> getConstraintServices() {
+        return constraintServices;
     }
 }
