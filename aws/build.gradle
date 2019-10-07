@@ -31,7 +31,7 @@ dependencies {
     testImplementation "io.smallrye:smallrye-config:$smallryeVersion"
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
 
-    testImplementation "org.trellisldp:trellis-event-serialization"
+    testImplementation "org.trellisldp:trellis-event-jackson"
     testImplementation "org.trellisldp:trellis-constraint-rules"
 
     testRuntimeClasspath "ch.qos.logback:logback-classic:$logbackVersion"

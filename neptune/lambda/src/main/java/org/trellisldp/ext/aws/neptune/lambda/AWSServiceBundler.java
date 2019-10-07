@@ -27,7 +27,7 @@ import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.ResourceService;
 import org.trellisldp.audit.DefaultAuditService;
 import org.trellisldp.constraint.LdpConstraintService;
-import org.trellisldp.event.DefaultActivityStreamService;
+import org.trellisldp.event.jackson.DefaultActivityStreamService;
 import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
 import org.trellisldp.ext.aws.DefaultNamespaceService;
 import org.trellisldp.http.core.DefaultTimemapGenerator;

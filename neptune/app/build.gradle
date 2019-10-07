@@ -22,7 +22,7 @@ dependencies {
     implementation "org.trellisldp:trellis-api"
     implementation "org.trellisldp:trellis-audit"
     implementation "org.trellisldp:trellis-constraint-rules"
-    implementation "org.trellisldp:trellis-event-serialization"
+    implementation "org.trellisldp:trellis-event-jackson"
     implementation "org.trellisldp:trellis-http"
     implementation "org.trellisldp:trellis-io-jena"
     implementation "org.trellisldp:trellis-namespaces"

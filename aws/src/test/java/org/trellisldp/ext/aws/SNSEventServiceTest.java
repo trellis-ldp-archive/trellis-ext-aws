@@ -34,7 +34,7 @@ import org.mockito.Mock;
 import org.trellisldp.api.ActivityStreamService;
 import org.trellisldp.api.Event;
 import org.trellisldp.api.EventService;
-import org.trellisldp.event.DefaultActivityStreamService;
+import org.trellisldp.event.jackson.DefaultActivityStreamService;
 import org.trellisldp.vocabulary.AS;
 import org.trellisldp.vocabulary.LDP;
 
