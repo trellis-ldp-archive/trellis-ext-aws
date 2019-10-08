@@ -20,7 +20,7 @@ import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.trellisldp.api.NamespaceService;
 import org.trellisldp.app.BaseServiceBundler;
-import org.trellisldp.app.DefaultConstraintServices;;
+import org.trellisldp.app.DefaultConstraintServices;
 import org.trellisldp.audit.DefaultAuditService;
 import org.trellisldp.constraint.LdpConstraintService;
 import org.trellisldp.event.jackson.DefaultActivityStreamService;
