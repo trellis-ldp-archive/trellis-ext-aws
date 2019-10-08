@@ -37,12 +37,12 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.CompletionStage;
@@ -50,6 +50,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.Quad;
+import org.apache.commons.rdf.jena.JenaDataset;
 import org.apache.commons.rdf.jena.JenaRDF;
 import org.apache.jena.riot.RDFDataMgr;
 import org.eclipse.microprofile.config.Config;
@@ -57,6 +58,7 @@ import org.slf4j.Logger;
 import org.trellisldp.api.MementoService;
 import org.trellisldp.api.Resource;
 import org.trellisldp.api.RuntimeTrellisException;
+import org.trellisldp.vocabulary.Trellis;
 
 /**
  * An S3-based Memento service.
@@ -120,12 +122,12 @@ public class S3MementoService implements MementoService {
                 resource.getInsertedContentRelation().map(IRI::getIRIString)
                     .ifPresent(m -> metadata.put(S3Resource.INSERTED_CONTENT_RELATION, m));
 
-                try (final CloseableJenaDataset dataset = new CloseableJenaDataset(rdf.createDataset());
+                try (final JenaDataset dataset = rdf.createDataset();
                         final OutputStream output = new FileOutputStream(file);
                         final Stream<? extends Quad> quads = resource.stream()) {
                     quads.forEachOrdered(dataset::add);
 
-                    if (dataset.hasAcl()) {
+                    if (dataset.contains(Optional.of(Trellis.PreferAccessControl), null, null, null)) {
                         metadata.put(S3Resource.HAS_ACL, "true");
                     }
                     RDFDataMgr.write(output, dataset.asJenaDatasetGraph(), NQUADS);
@@ -137,7 +139,7 @@ public class S3MementoService implements MementoService {
                             resource.getModified().truncatedTo(SECONDS)), file);
                 client.putObject(req.withMetadata(md));
                 Files.delete(file.toPath());
-            } catch (final IOException ex) {
+            } catch (final Exception ex) {
                 throw new RuntimeTrellisException("Error deleting locally buffered file", ex);
             }
         });
