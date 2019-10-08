@@ -18,6 +18,7 @@ dependencies {
     implementation "org.apache.jena:jena-rdfconnection:$jenaVersion"
     implementation "org.eclipse.microprofile.config:microprofile-config-api:$microprofileConfigVersion"
     implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    implementation "org.trellisldp:trellis-app"
     implementation "org.trellisldp:trellis-audit"
     implementation "org.trellisldp:trellis-constraint-rules"
     implementation "org.trellisldp:trellis-event-jackson"

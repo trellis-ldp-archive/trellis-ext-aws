@@ -18,11 +18,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.trellisldp.http.core.ServiceBundler;
 
-public class AWSServiceBundlerTest {
+public class TrellisServiceBundlerTest {
 
     @Test
     public void testServiceBundler() {
-        final ServiceBundler bundler = new AWSServiceBundler();
+        final ServiceBundler bundler = new TrellisServiceBundler();
 
         assertNotNull(bundler.getBinaryService(), "Missing binary service!");
         assertNotNull(bundler.getEventService(), "Missing event service!");

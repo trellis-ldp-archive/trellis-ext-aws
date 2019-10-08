@@ -22,22 +22,20 @@ import com.google.common.cache.Cache;
 
 import io.dropwizard.setup.Environment;
 
-import java.util.List;
-
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.trellisldp.api.AuditService;
-import org.trellisldp.api.ConstraintService;
 import org.trellisldp.api.IOService;
 import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.RDFaWriterService;
-import org.trellisldp.api.ResourceService;
+import org.trellisldp.app.BaseServiceBundler;
+import org.trellisldp.app.DefaultConstraintServices;;
 import org.trellisldp.audit.DefaultAuditService;
 import org.trellisldp.constraint.LdpConstraintService;
 import org.trellisldp.dropwizard.TrellisCache;
 import org.trellisldp.event.jackson.DefaultActivityStreamService;
-import org.trellisldp.ext.aws.AbstractAWSServiceBundler;
+import org.trellisldp.ext.aws.S3BinaryService;
+import org.trellisldp.ext.aws.S3MementoService;
+import org.trellisldp.ext.aws.SNSEventService;
 import org.trellisldp.http.core.DefaultTimemapGenerator;
-import org.trellisldp.http.core.TimemapGenerator;
 import org.trellisldp.io.JenaIOService;
 import org.trellisldp.namespaces.JsonNamespaceService;
 import org.trellisldp.rdfa.DefaultRdfaWriterService;
@@ -50,13 +48,7 @@ import org.trellisldp.triplestore.TriplestoreResourceService;
  * It combines a Triplestore-based resource service along with file-based binary and
  * memento storage. RDF processing is handled with Apache Jena.
  */
-public class TrellisServiceBundler extends AbstractAWSServiceBundler {
-
-    private final AuditService auditService;
-    private final ResourceService resourceService;
-    private final IOService ioService;
-    private List<ConstraintService> constraintServices;
-    private TimemapGenerator timemapGenerator;
+public class TrellisServiceBundler extends BaseServiceBundler {
 
     /**
      * Create a new application service bundler.
@@ -64,37 +56,14 @@ public class TrellisServiceBundler extends AbstractAWSServiceBundler {
      * @param environment the dropwizard environment
      */
     public TrellisServiceBundler(final AppConfiguration config, final Environment environment) {
-        super(new DefaultActivityStreamService());
-        ioService = buildIoService(config);
         auditService = new DefaultAuditService();
-        resourceService = buildResourceService(config, environment);
-        constraintServices = singletonList(new LdpConstraintService());
+        mementoService = new S3MementoService();
+        binaryService = new S3BinaryService();
+        eventService = new SNSEventService(new DefaultActivityStreamService());
         timemapGenerator = new DefaultTimemapGenerator();
-    }
-
-    @Override
-    public ResourceService getResourceService() {
-        return resourceService;
-    }
-
-    @Override
-    public AuditService getAuditService() {
-        return auditService;
-    }
-
-    @Override
-    public IOService getIOService() {
-        return ioService;
-    }
-
-    @Override
-    public Iterable<ConstraintService> getConstraintServices() {
-        return constraintServices;
-    }
-
-    @Override
-    public TimemapGenerator getTimemapGenerator() {
-        return timemapGenerator;
+        constraintServices = new DefaultConstraintServices(singletonList(new LdpConstraintService()));
+        ioService = buildIoService(config);
+        resourceService = buildResourceService(config, environment);
     }
 
     private static TriplestoreResourceService buildResourceService(final AppConfiguration config,

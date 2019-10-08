@@ -29,7 +29,7 @@ import org.trellisldp.http.core.ServiceBundler;
 
 public class TrellisLambdaHandler implements RequestStreamHandler {
 
-    private static final ServiceBundler serviceBundler = new AWSServiceBundler();
+    private static final ServiceBundler serviceBundler = new TrellisServiceBundler();
 
     private static final ResourceConfig jerseyApplication
         = new ResourceConfig().register(new TrellisHttpResource(serviceBundler));
