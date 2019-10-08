@@ -32,6 +32,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.CompletionStage;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.rdf.api.IRI;
 import org.eclipse.microprofile.config.Config;
@@ -45,6 +48,7 @@ import org.trellisldp.api.RuntimeTrellisException;
 /**
  * An S3-based binary service.
  */
+@ApplicationScoped
 public class S3BinaryService implements BinaryService {
 
     public static final String CONFIG_BINARY_BUCKET = "trellis.s3.binary.bucket";
@@ -60,6 +64,7 @@ public class S3BinaryService implements BinaryService {
     /**
      * Create an S3-based binary service.
      */
+    @Inject
     public S3BinaryService() {
         this(defaultClient(), getConfig());
     }

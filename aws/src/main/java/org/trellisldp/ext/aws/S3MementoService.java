@@ -48,6 +48,9 @@ import java.util.TreeSet;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Stream;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.Quad;
 import org.apache.commons.rdf.jena.JenaDataset;
@@ -63,6 +66,7 @@ import org.trellisldp.vocabulary.Trellis;
 /**
  * An S3-based Memento service.
  */
+@ApplicationScoped
 public class S3MementoService implements MementoService {
 
     public static final Logger LOGGER = getLogger(S3MementoService.class);
@@ -78,6 +82,7 @@ public class S3MementoService implements MementoService {
     /**
      * Create an S3-based memento service.
      */
+    @Inject
     public S3MementoService() {
         this(defaultClient(), getConfig());
     }

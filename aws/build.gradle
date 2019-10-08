@@ -10,6 +10,8 @@ ext {
 dependencies {
     implementation enforcedPlatform("org.trellisldp:trellis-bom:${trellisVersion}")
 
+    api "javax.enterprise:cdi-api:$cdiVersion"
+    api "javax.inject:javax.inject:$injectVersion"
     api "org.apache.commons:commons-rdf-api:$commonsRdfVersion"
     api "com.amazonaws:aws-java-sdk-s3:$awsVersion"
     api "com.amazonaws:aws-java-sdk-sns:$awsVersion"

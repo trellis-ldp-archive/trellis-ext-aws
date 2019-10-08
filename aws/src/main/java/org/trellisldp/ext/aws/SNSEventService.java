@@ -20,6 +20,9 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import com.amazonaws.services.sns.AmazonSNS;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.trellisldp.api.ActivityStreamService;
 import org.trellisldp.api.Event;
@@ -28,6 +31,7 @@ import org.trellisldp.api.EventService;
 /**
  * An SNS notification service.
  */
+@ApplicationScoped
 public class SNSEventService implements EventService {
 
     public static final String TRELLIS_SNS_TOPIC = "trellis.sns.topic";
@@ -42,6 +46,7 @@ public class SNSEventService implements EventService {
      * Cretae an SNS-bases notification service.
      * @param serializer the event serializer
      */
+    @Inject
     public SNSEventService(final ActivityStreamService serializer) {
         this(serializer, defaultClient(), getConfig().getValue(TRELLIS_SNS_TOPIC, String.class));
     }
