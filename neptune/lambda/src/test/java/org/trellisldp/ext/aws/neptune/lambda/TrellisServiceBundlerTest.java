@@ -13,7 +13,7 @@
  */
 package org.trellisldp.ext.aws.neptune.lambda;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 import org.trellisldp.http.core.ServiceBundler;
