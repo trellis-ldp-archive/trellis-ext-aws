@@ -24,8 +24,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
-import org.trellisldp.api.ActivityStreamService;
 import org.trellisldp.api.Event;
+import org.trellisldp.api.EventSerializationService;
 import org.trellisldp.api.EventService;
 
 /**
@@ -38,7 +38,7 @@ public class SNSEventService implements EventService {
 
     private static final Logger LOGGER = getLogger(SNSEventService.class);
 
-    private final ActivityStreamService serializer;
+    private final EventSerializationService serializer;
     private final AmazonSNS sns;
     private final String topic;
 
@@ -47,7 +47,7 @@ public class SNSEventService implements EventService {
      * @param serializer the event serializer
      */
     @Inject
-    public SNSEventService(final ActivityStreamService serializer) {
+    public SNSEventService(final EventSerializationService serializer) {
         this(serializer, defaultClient(), getConfig().getValue(TRELLIS_SNS_TOPIC, String.class));
     }
 
@@ -57,7 +57,7 @@ public class SNSEventService implements EventService {
      * @param client the SNS client
      * @param topic the topic ARN
      */
-    public SNSEventService(final ActivityStreamService serializer, final AmazonSNS client, final String topic) {
+    public SNSEventService(final EventSerializationService serializer, final AmazonSNS client, final String topic) {
         this.serializer = requireNonNull(serializer, "the event serializer may not be null!");
         this.sns = requireNonNull(client, "the SNS client may not be null!");
         this.topic = requireNonNull(topic, "the SNS topic may not be null!");
@@ -66,12 +66,10 @@ public class SNSEventService implements EventService {
     @Override
     public void emit(final Event event) {
         requireNonNull(event, "Cannot emit a null event!");
-        serializer.serialize(event).ifPresent(json -> {
-            try {
-                sns.publish(topic, json);
-            } catch (final Exception ex) {
-                LOGGER.error("Error writing to SNS topic {}: {}", topic, ex.getMessage());
-            }
-        });
+        try {
+            sns.publish(topic, serializer.serialize(event));
+        } catch (final Exception ex) {
+            LOGGER.error("Error writing to SNS topic {}: {}", topic, ex.getMessage());
+        }
     }
 }

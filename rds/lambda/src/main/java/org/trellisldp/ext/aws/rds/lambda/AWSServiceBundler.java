@@ -23,7 +23,7 @@ import org.trellisldp.app.BaseServiceBundler;
 import org.trellisldp.app.DefaultConstraintServices;
 import org.trellisldp.audit.DefaultAuditService;
 import org.trellisldp.constraint.LdpConstraintService;
-import org.trellisldp.event.jackson.DefaultActivityStreamService;
+import org.trellisldp.event.jackson.DefaultEventSerializationService;
 import org.trellisldp.ext.aws.S3BinaryService;
 import org.trellisldp.ext.aws.S3MementoService;
 import org.trellisldp.ext.aws.SNSEventService;
@@ -54,7 +54,7 @@ public class AWSServiceBundler extends BaseServiceBundler {
         auditService = new DefaultAuditService();
         mementoService = new DBWrappedMementoService(jdbi, new S3MementoService());
         binaryService = new S3BinaryService();
-        eventService = new SNSEventService(new DefaultActivityStreamService());
+        eventService = new SNSEventService(new DefaultEventSerializationService());
         timemapGenerator = new DefaultTimemapGenerator();
         constraintServices = new DefaultConstraintServices(singletonList(new LdpConstraintService()));
     }
